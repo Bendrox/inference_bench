@@ -1,0 +1,4 @@
+kv-cache-dtype: FP8
+enable-prefix-caching: False
+max-num-seqs: 128
+max-num-batched-tokens: 8192 # limite tokens traités en même temps dans un lot (batch).

@@ -5,3 +5,9 @@ is-cuda-available-device:
 
 nvidia-followup:
 	nvidia-smi --query-gpu=timestamp,utilization.gpu,memory.used,power.draw --format=csv -l 1
+
+get-models:
+	hf cache ls --sort size:desc | grep '^model/' 
+
+get-models-qwen:
+	hf cache ls --sort size:desc | grep '^model/Qwen' 

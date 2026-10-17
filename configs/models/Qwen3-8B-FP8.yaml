@@ -1,0 +1,4 @@
+model: Qwen/Qwen3-8B-FP8
+served-model-name: Qwen3-8B-FP8
+max-model-len: 8192 # limite  maximale du contexte d'une séquence unique
+dtype: FP8
