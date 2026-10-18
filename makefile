@@ -11,3 +11,6 @@ get-models:
 
 get-models-qwen:
 	hf cache ls --sort size:desc | grep '^model/Qwen' 
+
+server-log:
+	grep -iE "non-default args|model loading took|KV cache|maximum concurrency|startup complete" server.log
