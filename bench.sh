@@ -25,7 +25,7 @@ mkdir -p $DOSSIER
 # -p    = crée dossier et les dossiers parents s'ils manquent (ici "results/"),
 #         et ne fait pas d'erreur si le dossier existe déjà.
 
-cat configs/base.yaml configs/models/$MODELE.yaml configs/variants/$VARIANTE.yaml > $DOSSIER/config.yaml
+awk 1 configs/base.yaml configs/models/$MODELE.yaml configs/variants/$VARIANTE.yaml > $DOSSIER/config.yaml
 # cat = affiche le contenu de fichiers, l'un après l'autre.
 # >   = au lieu d'afficher à l'écran, écrit le tout dans un fichier.
 # => Résultat : config.yaml contient base + modèle + variante collés ensemble.
@@ -90,20 +90,22 @@ echo "Serveur prêt. Benchmark en cours..."
 
 # Le "\" en fin de ligne signifie : "la commande continue à la ligne suivante".
  
+# --num-prompts 500    = envoie 500 requêtes au total.
+# --max-concurrency 32 = au plus 32 requêtes en cours en même temps.
+# | tee                = affiche le résumé à l'écran ET le copie dans bench.txt
 vllm bench serve \
   --model $NOM_HF \
   --dataset-name sharegpt \
-  --dataset-path ShareGPT_V3_unfiltered_cleaned_split.json \
-  --num-prompts 500 \  # = envoie 500 requêtes au total.
+  --dataset-path data/ShareGPT_V3_unfiltered_cleaned_split.json \
+  --num-prompts 1000 \
   --max-concurrency 32 \
   --save-result --result-dir $DOSSIER \
-  | tee $DOSSIER/bench.txt # = affiche le résumé à l'écran ET le copie dans bench.txt
-   
+  | tee $DOSSIER/bench.txt
  
 # ÉTAPE 5 : arrêter le serveur
  
 kill $PID
-# Envoie au serveur le signal d'arrêt (comme un Ctrl+C).
+# Envoie au serveur le signal d'arrêt (= Ctrl+C).
  
 wait $PID 2>/dev/null
 # Attend que le serveur soit VRAIMENT arrêté, et donc que la mémoire du GPU
