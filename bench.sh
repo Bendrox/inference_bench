@@ -89,16 +89,13 @@ echo "Serveur prêt. Benchmark en cours..."
 # ÉTAPE 4 : lancer le benchmark
 
 # Le "\" en fin de ligne signifie : "la commande continue à la ligne suivante".
- 
-# --num-prompts 500    = envoie 500 requêtes au total.
-# --max-concurrency 32 = au plus 32 requêtes en cours en même temps.
-# | tee                = affiche le résumé à l'écran ET le copie dans bench.txt
+ # | tee                = affiche le résumé à l'écran ET le copie dans bench.txt
 vllm bench serve \
   --model $NOM_HF \
   --dataset-name sharegpt \
   --dataset-path data/ShareGPT_V3_unfiltered_cleaned_split.json \
   --num-prompts 1000 \
-  --max-concurrency 32 \
+  --max-concurrency 128 \
   --save-result --result-dir $DOSSIER \
   | tee $DOSSIER/bench.txt
  
@@ -113,13 +110,9 @@ wait $PID 2>/dev/null
 # le suivant ne doit pas démarrer tant que le GPU est encore occupé.
  
  
-# ------------------------------------------------------------
 # ÉTAPE 6 : afficher les infos mémoire clés du log
-# ------------------------------------------------------------
  
-echo ""
-# Affiche une ligne vide, pour aérer.
- 
+echo "" 
 echo "===== Infos mémoire (server.log) ====="
  
 grep -iE "KV cache size|maximum concurrency" $DOSSIER/server.log
