@@ -4,20 +4,21 @@
 
 # bench.sh : lance UN benchmark complet 
 
-# Usage   : ./bench.sh <modele> <variante>
-# Exemple : ./bench.sh Qwen3-8B-FP8 fp8-kv
+# Usage   : ./bench.sh <data> <modele> <variante>
+# Exemple : ./bench.sh sharegpt Qwen3-8B-FP8 fp8-kv
 # Résultats  dans : results/Qwen3-8B-FP8_fp8-kv/
 
 # VARIABLES
+DATA=$1
 
-MODELE=$1
+MODELE=$2
 # $1 1er mot tapé après ./bench.sh
 # => "./bench.sh Qwen3-8B-FP8 fp8-kv", MODELE vaut "Qwen3-8B-FP8"
 
-VARIANTE=$2
+VARIANTE=$3
 # $2 = le 2e mot tapé. Ici VARIANTE vaut "fp8-kv"
 
-DOSSIER=results/${MODELE}_${VARIANTE}
+DOSSIER=results/${DATA}_${MODELE}_${VARIANTE}
 
 # ÉTAPE 1 : préparer le dossier et assembler la config
 
@@ -39,9 +40,20 @@ NOM_HF=$(grep '^model:' $DOSSIER/config.yaml | awk '{print $2}')
 #                  -> "Qwen/Qwen3-8B-FP8"
 # Le benchmark a besoin de ce nom pour envoyer ses requêtes au bon modèle.
 
+MAX_CONC=$(grep '^max-concurrency:' $DOSSIER/config.full.yaml | awk '{print $2}')
+MAX_CONC=${MAX_CONC:-128}   # valeur par défaut si absente
+
+grep -v '^max-concurrency:' $DOSSIER/config.full.yaml > $DOSSIER/config.yaml
+# config.yaml (sans max-concurrency) est celle que lit vllm serve
+
+if [ "$DATA" = "sharegpt" ]; then
+  DATA_FILE="data/ShareGPT_V3_unfiltered_cleaned_split.json"
+else
+  echo "ERREUR : dataset '$DATA' inconnu (attendu : sharegpt)"; exit 1
+fi
 
 # ÉTAPE 2 : démarrer le serveur vLLM en arrière-plan
-echo "Démarrage du serveur vllm avec ($MODELE / $VARIANTE)..."
+echo "Démarrage du serveur vllm avec ( $DATA /$MODELE / $VARIANTE)..."
 
 vllm serve --config $DOSSIER/config.yaml > $DOSSIER/server.log 2>&1 &
 # vllm serve --config ... = lance le serveur avec notre config assemblée.
@@ -53,6 +65,8 @@ vllm serve --config $DOSSIER/config.yaml > $DOSSIER/server.log 2>&1 &
 #                           (sinon il resterait bloqué ici pour toujours).
 
 PID=$!
+trap 'kill $PID 2>/dev/null' EXIT
+# trap EXIT = exécute cette commande quand le script se termine, quelle qu'en soit la raison.
 # $! = le numéro de processus (PID) de la dernière commande lancée avec &.
 # On le garde pour pouvoir surveiller puis arrêter le serveur plus tard.
 
@@ -87,13 +101,12 @@ echo "Serveur prêt. Benchmark en cours..."
 
 
 # ÉTAPE 4 : lancer le benchmark
-
 # Le "\" en fin de ligne signifie : "la commande continue à la ligne suivante".
  # | tee                = affiche le résumé à l'écran ET le copie dans bench.txt
 vllm bench serve \
   --model $NOM_HF \
-  --dataset-name sharegpt \
-  --dataset-path data/ShareGPT_V3_unfiltered_cleaned_split.json \
+  --dataset-name $DATA \
+  --dataset-path $DATA_FILE \
   --num-prompts 1000 \
   --max-concurrency 128 \
   --save-result --result-dir $DOSSIER \
@@ -124,4 +137,3 @@ grep -iE "KV cache size|maximum concurrency" $DOSSIER/server.log
  
 echo ""
 echo "Terminé. Tout est dans $DOSSIER/"
- 
