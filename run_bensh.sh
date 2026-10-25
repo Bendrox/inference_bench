@@ -28,10 +28,10 @@ mkdir -p $DOSSIER
 # -p    = crée dossier et les dossiers parents s'ils manquent (ici "results/"),
 #         et ne fait pas d'erreur si le dossier existe déjà.
 
-awk 1 configs/base.yaml configs/models/$MODELE.yaml configs/variants/$VARIANTE.yaml configs/kv_cache/$KV_CACHE.yaml > $DOSSIER/config.yaml
+awk 1 configs/server.yaml configs/models/$MODELE.yaml configs/variants/$VARIANTE.yaml configs/kv_cache/$KV_CACHE.yaml > $DOSSIER/config.yaml
 # cat = affiche le contenu de fichiers, l'un après l'autre.
 # >   = au lieu d'afficher à l'écran, écrit le tout dans un fichier.
-# => Résultat : config.yaml contient base + modèle + variante collés ensemble.
+# => Résultat : config.yaml contient server + modèle + variante collés ensemble.
 
 NOM_HF=$(grep '^model:' $DOSSIER/config.yaml | awk '{print $2}')
 # $( ... ) = exécute la commande entre parenthèses et met son résultat dans NOM_HF.
@@ -47,6 +47,8 @@ MAX_CONC=$(grep '^max-concurrency:' $DOSSIER/config.yaml | awk '{print $2}')
 # on l'exclut de la config donnée au serveur (serve.yaml).
 MAX_CONC=${MAX_CONC:-64}
 grep -v '^max-concurrency:' $DOSSIER/config.yaml > $DOSSIER/serve.yaml
+
+NUM_PROMPTS=${NUM_PROMPTS:-1000}
 
 if [ "$DATA" = "sharegpt" ]; then
   DATA_FILE="data/ShareGPT_V3_unfiltered_cleaned_split.json"
@@ -109,7 +111,7 @@ vllm bench serve \
   --model $NOM_HF \
   --dataset-name $DATA \
   --dataset-path $DATA_FILE \
-  --num-prompts 1000 \
+  --num-prompts $NUM_PROMPTS \
   --max-concurrency $MAX_CONC \
   --save-result --result-dir $DOSSIER \
   | tee $DOSSIER/bench.txt
