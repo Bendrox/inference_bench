@@ -8,19 +8,21 @@
 # Exemple : ./bench.sh sharegpt Qwen3-8B-FP8 fp8-kv
 # Résultats  dans : results/Qwen3-8B-FP8_fp8-kv/
 
+set -euo pipefail
 # VARIABLES
-DATA=$2
+if [ $# -ne 5 ]; then
+  echo "Usage : $0 <modele> <dataset> <kv_cache> <engine> <client>"
+  echo "Ex.   : $0 Qwen3.5-9B-FP8-self sharegpt fp8-nocache ctx8k-seqs256-batch8k conc256-n1000"
+  exit 1
+fi
+MODELE=$1; DATA=$2; KV_CACHE=$3; ENGINE=$4; CLIENT=$5
 
-MODELE=$1
-# $1 1er mot tapé après ./bench.sh
-# => "./bench.sh Qwen3-8B-FP8 fp8-kv", MODELE vaut "Qwen3-8B-FP8"
+DOSSIER=results/${DATA}/${MODELE}_${KV_CACHE}_${ENGINE}_${CLIENT}
 
-KV_CACHE=$3
-
-VARIANTE=$4
-# $2 = le 2e mot tapé. Ici VARIANTE vaut "fp8-kv"
-
-DOSSIER=results/${DATA}/${MODELE}_${KV_CACHE}_${VARIANTE}
+for f in configs/base.yaml "configs/models/$MODELE.yaml" "configs/kv_cache/$KV_CACHE.yaml" \
+         "configs/engine/$ENGINE.yaml" "configs/client/$CLIENT.yaml"; do
+  [ -f "$f" ] || { echo "ERREUR : fichier introuvable : $f"; exit 1; }
+done
 
 # ÉTAPE 1 : préparer le dossier et assembler la config
 
@@ -28,27 +30,14 @@ mkdir -p $DOSSIER
 # -p    = crée dossier et les dossiers parents s'ils manquent (ici "results/"),
 #         et ne fait pas d'erreur si le dossier existe déjà.
 
-awk 1 configs/server.yaml configs/models/$MODELE.yaml configs/variants/$VARIANTE.yaml configs/kv_cache/$KV_CACHE.yaml > $DOSSIER/config.yaml
-# cat = affiche le contenu de fichiers, l'un après l'autre.
-# >   = au lieu d'afficher à l'écran, écrit le tout dans un fichier.
-# => Résultat : config.yaml contient server + modèle + variante collés ensemble.
+CLIENT_FILE="configs/client/$CLIENT.yaml"
 
-NOM_HF=$(grep '^model:' $DOSSIER/config.yaml | awk '{print $2}')
-# $( ... ) = exécute la commande entre parenthèses et met son résultat dans NOM_HF.
-# grep '^model:' = garde uniquement la ligne qui COMMENCE (^) par "model:"
-#                  -> "model: Qwen/Qwen3-8B-FP8"
-# |              = "pipe" | : envoie le résultat de grep à la commande suivante.
-# awk '{print $2}' = découpe la ligne aux espaces et garde le 2e morceau
-#                  -> "Qwen/Qwen3-8B-FP8"
-# Le benchmark a besoin de ce nom pour envoyer ses requêtes au bon modèle.
+awk 1 configs/base.yaml "configs/models/$MODELE.yaml" "configs/kv_cache/$KV_CACHE.yaml" "configs/engine/$ENGINE.yaml" > "$DOSSIER/serve.yaml"
+cp "$CLIENT_FILE" "$DOSSIER/client.yaml"
 
-MAX_CONC=$(grep '^max-concurrency:' $DOSSIER/config.yaml | awk '{print $2}')
-# max-concurrency est une option de "vllm bench serve", pas de "vllm serve" :
-# on l'exclut de la config donnée au serveur (serve.yaml).
-MAX_CONC=${MAX_CONC:-64}
-grep -v '^max-concurrency:' $DOSSIER/config.yaml > $DOSSIER/serve.yaml
-
-NUM_PROMPTS=${NUM_PROMPTS:-1000}
+NOM_HF=$(awk '/^model:/{print $2}' "$DOSSIER/serve.yaml")
+MAX_CONC=${MAX_CONC:-$(awk '/^max-concurrency:/{print $2}' "$CLIENT_FILE")}
+NUM_PROMPTS=${NUM_PROMPTS:-$(awk '/^num-prompts:/{print $2}' "$CLIENT_FILE")}
 
 if [ "$DATA" = "sharegpt" ]; then
   DATA_FILE="data/ShareGPT_V3_unfiltered_cleaned_split.json"
@@ -57,9 +46,9 @@ else
 fi
 
 # ÉTAPE 2 : démarrer le serveur vLLM en arrière-plan
-echo "Démarrage du serveur vllm avec ( $DATA /$MODELE / $VARIANTE)..."
+echo "Démarrage du serveur vllm avec ( $DATA /$MODELE / $ENGINE / $CLIENT )..."
 
-vllm serve --config $DOSSIER/serve.yaml > $DOSSIER/server.log 2>&1 &
+vllm serve --num-warmups 100 --config $DOSSIER/serve.yaml > $DOSSIER/server.log 2>&1 &
 # vllm serve --config ... = lance le serveur avec notre config assemblée.
 # > $DOSSIER/server.log   = les messages normaux vont dans server.log.
 # 2>&1                    = les messages d'erreur vont au même endroit
@@ -121,7 +110,7 @@ vllm bench serve \
 kill $PID
 # Envoie au serveur le signal d'arrêt (= Ctrl+C).
  
-wait $PID 2>/dev/null
+wait $PID 2>/dev/null || true
 # Attend que le serveur soit VRAIMENT arrêté, et donc que la mémoire du GPU
 # soit libérée. Indispensable si tu enchaînes plusieurs tests :
 # le suivant ne doit pas démarrer tant que le GPU est encore occupé.
