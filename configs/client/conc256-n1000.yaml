@@ -1,2 +1,2 @@
 max-concurrency: 256
-num-prompts: 1000
+num-prompts: 3000
