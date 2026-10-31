@@ -26,7 +26,7 @@ def assemble_yaml(args):
                     contenu = yaml.safe_load(f) or {}
         except yaml.YAMLError as exc:
             sys.exit(f"ERREUR : yaml invalide dans {path} : {exc}")
-            fusion.update(contenu)
+        fusion.update(contenu)
                 
     concat_files= "final_config.yaml"
     sortie=Path(args.output_file)
