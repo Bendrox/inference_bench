@@ -28,12 +28,11 @@ def assemble_yaml(args):
             sys.exit(f"ERREUR : yaml invalide dans {path} : {exc}")
         fusion.update(contenu)
                 
-    concat_files= "final_config.yaml"
     sortie=Path(args.output_file)
     sortie.parent.mkdir(parents=True, exist_ok=True)
-    with open(concat_files, "w", encoding="utf-8") as f :
+    with open(sortie, "w", encoding="utf-8") as f :
         yaml.safe_dump(fusion, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
-    print(f"Fusion réussie ! Le fichier a été enregistré sous : {concat_files}")
+    print(f"Fusion réussie ! Le fichier a été enregistré sous : {sortie}")
 
 def load_client(args) -> dict:
     with open(Path(args.client), encoding="utf-8") as f:
