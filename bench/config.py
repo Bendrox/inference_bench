@@ -5,13 +5,13 @@ import argparse
 PROJECT_ROOT=Path(__file__).resolve().parent.parent
 CONFIG_PATH= PROJECT_ROOT / "configs"
 BASE_FILE=CONFIG_PATH / "base.yaml"
-
-def get_yamlfiles() -> list[Path]:
-    return list(CONFIG_PATH.rglob("*.yaml"))
+DATASETS = {"sharegpt": "data/ShareGPT_V3_unfiltered_cleaned_split.json"}
 
 def get_server_files_path(args) -> list[Path]:
     "Donne ordre de prio croissante : un fichier bas écrase le précédent"
-    return [BASE_FILE, Path(args.model), Path(args.kv_cache), Path(args.engine)]
+    return [BASE_FILE, PROJECT_ROOT / args.model , 
+            PROJECT_ROOT / args.kv_cache,
+            PROJECT_ROOT / args.engine]
 
 def assemble_yaml(args):
     import sys
@@ -33,9 +33,11 @@ def assemble_yaml(args):
     with open(sortie, "w", encoding="utf-8") as f :
         yaml.safe_dump(fusion, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
     print(f"Fusion réussie ! Le fichier a été enregistré sous : {sortie}")
+    return fusion
+
 
 def load_client(args) -> dict:
-    with open(Path(args.client), encoding="utf-8") as f:
+    with open(PROJECT_ROOT / args.client, encoding="utf-8") as f:
         client= yaml.safe_load(f)
     max_conc = args.max_conc or client["max-concurrency"]
     return {
@@ -48,7 +50,6 @@ def read_arg():
     parser = argparse.ArgumentParser(description="Assemble les configs pour un benchmark")
     parser.add_argument("--output-file", default= "global_config.yaml")
     parser.add_argument("--model", default= "configs/models/Qwen3.5-9B-FP8-self.yaml")
-    DATASETS = {"sharegpt": "data/ShareGPT_V3_unfiltered_cleaned_split.json"}
     parser.add_argument("--dataset", default= "sharegpt", choices=DATASETS)
     parser.add_argument("--kv_cache", default= "configs/kv_cache/fp8-nocache.yaml")
     parser.add_argument("--engine", default= "configs/engine/ctx8k-seqs256-batch8k.yaml")
@@ -62,3 +63,10 @@ def read_arg():
 if __name__ == "__main__":
     args=read_arg()
     assemble_yaml(args)
+    
+if __name__ == "__main__":
+    args = read_arg()
+    config = assemble_yaml(args)
+    client = load_client(args)
+    print("modèle :", config["model"])
+    print("client :", client)
