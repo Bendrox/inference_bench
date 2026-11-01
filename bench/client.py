@@ -11,8 +11,8 @@ def run_bench(i:int, dossier: Path, nom_hf: str, dataset: str, client: dict) -> 
           "--num-prompts", str(client["num_prompts"]),
           "--max-concurrency", str(client["max_conc"]),
           "--num-warmups", str(client["num_warmups"]),
-          "temperature", "0", "--ignore-eos",
-          "save-result", "--result-dir", 
+          "--temperature", "0", "--ignore-eos",
+          "--save-result", "--result-dir", 
           str(dossier),
           "--result-filename",
           f"run{i}.json"

@@ -43,7 +43,7 @@ def load_client(args) -> dict:
     return {
         "max_conc":max_conc,
         "num_prompts": args.num_prompts or client["num-prompts"],
-        "num_warmups": args.num_warmps or max_conc,
+        "num_warmups": args.num_warmups or max_conc,
     }
     
 def read_arg():
