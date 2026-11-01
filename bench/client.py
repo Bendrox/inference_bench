@@ -4,7 +4,7 @@ from pathlib import Path
 from config import DATASETS
 
 def run_bench(i:int, dossier: Path, nom_hf: str, dataset: str, client: dict) -> None:
-    cmd= ["vllm, bench", "serve",
+    cmd= ["vllm", "bench", "serve",
           "--model", nom_hf,
           "--dataset-name", dataset,
           "--dataset-path", DATASETS[dataset], 
