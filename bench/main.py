@@ -13,3 +13,21 @@ def main():
     
     args.output_file= dossier / "serve.yaml"
     config= assemble_yaml(args)
+    
+    client = load_client(args)
+    
+    proc= start_server(dossier/ "serve.yaml", dossier / "server.log")
+    
+    try: 
+        wait_ready(proc, config.get("port", 8000))
+        for i in range(1, args.nb_runs +1):
+            print(f"-- Run {i}/{args.nb_runs} --")
+            run_bench(i, dossier, config["model"],
+                      args.dataset,
+                      client)
+    finally:
+        stop_server(proc)
+        
+if __name__ == "__main__":
+    main()
+            
