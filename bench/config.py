@@ -58,6 +58,8 @@ def read_arg():
     parser.add_argument("--num-prompts", type=int, default=None)
     parser.add_argument("--nb-runs", type=int, default=3)
     parser.add_argument("--num-warmups", type=int, default=None)
+    parser.add_argument("--file-expe", type=str, default=None)
+
     return parser.parse_args()
     
 if __name__ == "__main__":

@@ -1,3 +1,16 @@
+"""
+Objective: measure the noise and the variance of results between runs.
+Script to agregate the results of n benchmarks results. it aggregate 6 metrics: 
+- output_throughput
+- total_token_throughput
+- median_ttft_ms
+- p99_ttft_ms
+- median_tpot_ms
+- p99_tpot_ms
+For every metric, it will compute mediane, min, max and diff between min and max.
+"""
+
+
 import json, glob, statistics, sys
 from pathlib import Path
 fichiers = sorted(glob.glob(sys.argv[1] + "/run*.json"))
@@ -21,6 +34,4 @@ with open(Path(sys.argv[1]) / "synthese.json", "w", encoding="utf-8") as f:
 
 
 # uv run python summarize.py "$DOSSIER"
-# Comment l'interpréter : si l'écart entre min et max du débit dépasse quelques pour cent, la mesure est bruitée. 
-# Dans ce cas, augmente num-prompts (par exemple 3000 dans client/) avant de conclure quoi que ce soit entre deux configs. 
-# Le P99 est naturellement plus instable que la médiane.
+# uv run python bench/summarize.py results/sharegpt/Qwen3.5-9B-FP8-self_fp8-nocache_ctx8k-seqs256-batch8k_conc256-n1000
