@@ -27,7 +27,10 @@ def assemble_yaml(args):
         except yaml.YAMLError as exc:
             sys.exit(f"ERREUR : yaml invalide dans {path} : {exc}")
         fusion.update(contenu)
-                
+    
+    if args.gpu_mem:
+        fusion["gpu-memory-utilization"]= args.gpu_mem
+        
     sortie=Path(args.output_file)
     sortie.parent.mkdir(parents=True, exist_ok=True)
     with open(sortie, "w", encoding="utf-8") as f :
@@ -58,8 +61,8 @@ def read_arg():
     parser.add_argument("--num-prompts", type=int, default=None)
     parser.add_argument("--nb-runs", type=int, default=3)
     parser.add_argument("--num-warmups", type=int, default=None)
-    parser.add_argument("--file-expe", type=str, default=None)
-
+    parser.add_argument("--output_dir", type=str, default="expe_1")
+    parser.add_argument("--gpu-mem", type=float, default=None)
     return parser.parse_args()
     
 if __name__ == "__main__":
