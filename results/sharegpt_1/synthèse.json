@@ -1,0 +1,8 @@
+[
+    "output_throughput         médiane=   4503.17  min=   4495.11  max=   4541.70",
+    "total_token_throughput    médiane=   9370.06  min=   9353.30  max=   9450.23",
+    "median_ttft_ms            médiane=    414.64  min=    413.95  max=    421.24",
+    "p99_ttft_ms               médiane=   2466.90  min=   2418.00  max=   2479.42",
+    "median_tpot_ms            médiane=     49.73  min=     49.38  max=     49.86",
+    "p99_tpot_ms               médiane=    182.26  min=    179.26  max=    190.72"
+]

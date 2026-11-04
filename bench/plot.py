@@ -9,20 +9,16 @@ fonction de la valeur de gpu-memory-utilization.
 
 Entrée: `synthese.json` 
 
-Sortie
-------
+Sortie: 
 `results/gpu_sweep.png` : grille 2x3, un graphique par métrique de `summarize.CLES`.
   - le point est la médiane des runs ;
   - la barre d'erreur va du min au max des runs (= le bruit de mesure).
 Si l'écart entre deux points est du même ordre que la barre d'erreur, la
 différence n'est pas significative.
 
-Usage
------
-    uv run python bench/plot.py
+Usage :  uv run python bench/plot.py
 
-Limites
--------
+Limites:
 - Un seul dossier de config par `gpu_<valeur>` est attendu. S'il y en a plusieurs,
   le dernier (ordre alphabétique) écrase les autres.
 - Une valeur pour laquelle vLLM a planté n'a pas de `synthese.json` : elle
