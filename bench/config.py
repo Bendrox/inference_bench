@@ -88,7 +88,7 @@ def read_arg():
     parser.add_argument("--dataset", default= "sharegpt", choices=DATASETS)
     parser.add_argument("--kv_cache", default= "configs/kv_cache/fp8-nocache.yaml")
     parser.add_argument("--engine", default= "configs/engine/ctx8k-seqs256-batch8k.yaml")
-    parser.add_argument("--client", default= "configs/client/conc256-n1000.yaml")
+    parser.add_argument("--client", default= "configs/client/conc256-n3000.yaml")
     parser.add_argument("--max-conc", type=int, default=None)
     parser.add_argument("--num-prompts", type=int, default=None)
     parser.add_argument("--nb-runs", type=int, default=3)
