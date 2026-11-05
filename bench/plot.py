@@ -2,21 +2,21 @@
 plot.py : trace l'effet de `gpu-memory-utilization` sur les métriques du benchmark.
 
 Chaque lancement produit (voir main.py et summarize.py) :
-    results/gpu_<valeur>/<nom_de_la_config>/synthese.json
+    results/<expe>/gpu_<valeur>/synthese.json
 
-Ce script lit tous ces `synthese.json`, puis trace une courbe par métrique en
-fonction de la valeur de gpu-memory-utilization.
+Ce script lit tous ces `synthese.json` d'une expérience, puis trace une courbe
+par métrique en fonction de la valeur de gpu-memory-utilization.
 
-Entrée: `synthese.json` 
+Entrée: `results/<expe>/gpu_*/synthese.json`
 
-Sortie: 
-`results/gpu_sweep.png` : grille 2x3, un graphique par métrique de `summarize.CLES`.
+Sortie:
+`results/<expe>/gpu_sweep.png` : grille 2x3, un graphique par métrique de `summarize.CLES`.
   - le point est la médiane des runs ;
   - la barre d'erreur va du min au max des runs (= le bruit de mesure).
 Si l'écart entre deux points est du même ordre que la barre d'erreur, la
 différence n'est pas significative.
 
-Usage :  uv run python bench/plot.py
+Usage :  uv run python bench/plot.py [nom_expe]     (défaut : "study")
 
 """
 import json
@@ -29,13 +29,18 @@ from summarize import CLES   # liste des métriques, partagée avec summarize.py
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 EXPE = sys.argv[1] if len(sys.argv) > 1 else "study"
-RESULTS = PROJECT_ROOT / "results"
+RESULTS = PROJECT_ROOT / "results" / EXPE
 PREFIXE = "gpu_"                       # préfixe des dossiers : gpu_0.7, gpu_0.8, ...
 SORTIE = RESULTS / "gpu_sweep.png"
 
 
 def charger() -> dict[float, dict]:
-    """Charge les synthèses de tous les dossiers `results/study/gpu_<valeur>/*/`"""
+    """Charge les synthèses de tous les dossiers `results/<expe>/gpu_<valeur>/`.
+
+    La valeur de gpu-memory-utilization est déduite du nom du dossier
+    (`gpu_0.7` -> 0.7) : c'est pourquoi le balayage utilise `--output_dir gpu_<valeur>`.
+    Retourne {valeur_gpu: synthese}.
+    """
     data = {}
     for f in sorted(RESULTS.glob(f"{PREFIXE}*/synthese.json")):
         dossier_gpu = f.parent.name                       # ex. "gpu_0.7"
@@ -65,7 +70,7 @@ def tracer_metrique(ax, data: dict[float, dict], cle: str) -> None:
 def main() -> None:
     data = charger()
     if not data:
-        sys.exit(f"Aucun synthese.json trouvé dans {RESULTS}/{PREFIXE}*/*/")
+        sys.exit(f"Aucun synthese.json trouvé dans {RESULTS}/{PREFIXE}*/")
 
     # 6 métriques -> grille 2 lignes x 3 colonnes. Si CLES change de taille,
     # adapter la grille (zip s'arrête à la plus courte des deux séquences).

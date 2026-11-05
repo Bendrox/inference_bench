@@ -1,6 +1,8 @@
 import yaml
 from pathlib import Path
 import argparse
+import subprocess
+from datetime import datetime
 
 PROJECT_ROOT=Path(__file__).resolve().parent.parent
 CONFIG_PATH= PROJECT_ROOT / "configs"
@@ -49,6 +51,36 @@ def load_client(args) -> dict:
         "num_warmups": args.num_warmups or max_conc,
     }
     
+def get_gpu_info() -> dict:
+    """Infos du 1er GPU via nvidia-smi (n'initialise pas CUDA dans ce process).
+    Si nvidia-smi est absent ou échoue, retourne {"name": "unknown"} sans planter le bench."""
+    cmd = ["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
+           "--format=csv,noheader,nounits"]
+    try:
+        sortie = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
+        name, mem, driver = [x.strip() for x in sortie.splitlines()[0].split(",")]
+        return {"name": name, "memory_total_mib": int(mem), "driver": driver}
+    except (OSError, subprocess.CalledProcessError, ValueError, IndexError):
+        return {"name": "unknown"}
+
+
+def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
+    """Snapshot complet de l'expérience dans <dossier>/run.yaml (par sections).
+    `config` = config vLLM fusionnée (= serve.yaml), `client` = valeurs résolues de load_client."""
+    run = {
+        "experiment": {"name": args.expe_name, "output_dir": args.output_dir,
+                       "date": datetime.now().isoformat(timespec="seconds"),
+                       "nb_runs": args.nb_runs},
+        "sources": {"model": args.model, "kv_cache": args.kv_cache,
+                    "engine": args.engine, "client": args.client},
+        "gpu": get_gpu_info(),
+        "serve": config,
+        "client": {"dataset": args.dataset, **client},
+    }
+    with open(dossier / "run.yaml", "w", encoding="utf-8") as f:
+        yaml.safe_dump(run, f, sort_keys=False, allow_unicode=True, default_flow_style=False)
+
+
 def read_arg():
     parser = argparse.ArgumentParser(description="Assemble les configs pour un benchmark")
     parser.add_argument("--output-file", default= "global_config.yaml")
@@ -63,7 +95,7 @@ def read_arg():
     parser.add_argument("--num-warmups", type=int, default=None)
     parser.add_argument("--output_dir", type=str, default="expe_1")
     parser.add_argument("--gpu-mem", type=float, default=None)
-    parser.add_argument("--expe-name", type=str, default="study", required=True)
+    parser.add_argument("--expe-name", type=str, default=None, required=True)
     return parser.parse_args()
     
 if __name__ == "__main__":

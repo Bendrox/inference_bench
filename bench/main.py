@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from client import run_bench
-from config import PROJECT_ROOT, assemble_yaml, load_client, read_arg
+from config import PROJECT_ROOT, assemble_yaml, load_client, read_arg, write_run_yaml
 from server import start_server, stop_server, wait_ready
 from summarize import print_synthese, summarize
 
@@ -14,7 +14,8 @@ def main():
     args.output_file= dossier / "serve.yaml"
     config= assemble_yaml(args)
     client = load_client(args)
-    
+    write_run_yaml(dossier, args, config, client)
+
     proc= start_server(dossier/ "serve.yaml", dossier / "server.log")
     
     try: 
