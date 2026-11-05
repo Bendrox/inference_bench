@@ -7,7 +7,7 @@ import subprocess
 
 def start_server(serve_yaml: Path, log_path: Path) -> subprocess.Popen:
     """
-    Lance un serveur vLLM en arrière-plan avec une configuration YAML
+    Lance un serveur vLLM en arrière-plan avec config YAML
     et journalise sa sortie dans un fichier de log.
     
     '-> subprocess.Popen' : indique que la fonction retourne un objet qui sert de "télécommande" 

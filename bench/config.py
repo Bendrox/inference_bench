@@ -55,14 +55,15 @@ def get_gpu_info() -> dict:
     """Infos du 1er GPU via nvidia-smi (n'initialise pas CUDA dans ce process).
     Si nvidia-smi est absent ou échoue, retourne {"name": "unknown"} sans planter le bench."""
     cmd = ["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
+           "--query-gpu=name,memory.total,driver_version,enforced.power.limit,power.default_limit",
            "--format=csv,noheader,nounits"]
     try:
         sortie = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
-        name, mem, driver = [x.strip() for x in sortie.splitlines()[0].split(",")]
-        return {"name": name, "memory_total_mib": int(mem), "driver": driver}
+        name, mem, driver, power, power_default = [x.strip() for x in sortie.splitlines()[0].split(",")]
+        return {"name": name, "memory_total_mib": int(mem), "driver": driver,
+                 "power_limit_w": float(power), "power_default_w": float(power_default)}
     except (OSError, subprocess.CalledProcessError, ValueError, IndexError):
         return {"name": "unknown"}
-
 
 def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
     """Snapshot complet de l'expérience dans <dossier>/run.yaml (par sections).
