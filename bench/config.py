@@ -66,7 +66,7 @@ def get_gpu_info() -> dict:
 
 def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
     """Snapshot complet de l'expérience dans <dossier>/run.yaml (par sections).
-    `config` = config vLLM fusionnée (= serve.yaml), `client` = valeurs résolues de load_client."""
+    `config` = config vLLM fusionnée (celle passée à `vllm serve --config`), `client` = valeurs résolues de load_client."""
     run = {
         "experiment": {"name": args.expe_name, "output_dir": args.output_dir,
                        "date": datetime.now().isoformat(timespec="seconds"),

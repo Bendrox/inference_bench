@@ -1,3 +1,4 @@
+import tempfile
 from pathlib import Path
 
 from client import run_bench
@@ -11,23 +12,26 @@ def main():
     dossier= PROJECT_ROOT / "results" / args.expe_name /args.output_dir 
     dossier.mkdir(parents=True, exist_ok=True)
     
-    args.output_file= dossier / "serve.yaml"
-    config= assemble_yaml(args)
-    client = load_client(args)
-    write_run_yaml(dossier, args, config, client)
+    # vllm serve exige un fichier --config : on le génère dans un dossier temporaire
+    # (supprimé à la sortie du `with`). La trace de l'expérience est dans run.yaml.
+    with tempfile.TemporaryDirectory() as tmp:
+        args.output_file= Path(tmp) / "serve.yaml"
+        config= assemble_yaml(args)
+        client = load_client(args)
+        write_run_yaml(dossier, args, config, client)
 
-    proc= start_server(dossier/ "serve.yaml", dossier / "server.log")
-    
-    try: 
-        wait_ready(proc, config.get("port", 8000))
-        for i in range(1, args.nb_runs +1):
-            print(f"-- Run {i}/{args.nb_runs} --")
-            run_bench(i, dossier, config["model"],
-                      args.dataset,
-                      client)
-    finally:
-        stop_server(proc)
-    
+        proc= start_server(args.output_file, dossier / "server.log")
+
+        try:
+            wait_ready(proc, config.get("port", 8000))
+            for i in range(1, args.nb_runs +1):
+                print(f"-- Run {i}/{args.nb_runs} --")
+                run_bench(i, dossier, config["model"],
+                          args.dataset,
+                          client)
+        finally:
+            stop_server(proc)
+
     print_synthese(summarize(dossier))
         
 if __name__ == "__main__":
