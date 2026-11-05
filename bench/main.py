@@ -1,3 +1,5 @@
+import socket
+import sys
 import tempfile
 from pathlib import Path
 
@@ -20,10 +22,18 @@ def main():
         client = load_client(args)
         write_run_yaml(dossier, args, config, client)
 
+        # Si un serveur (ex. orphelin d'un run interrompu) écoute déjà sur le port,
+        # wait_ready le prendrait pour le nôtre et on mesurerait la mauvaise config.
+        port = config.get("port", 8000)
+        with socket.socket() as s:
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                sys.exit(f"ERREUR : le port {port} est déjà utilisé (serveur vLLM orphelin ?). "
+                         f"Voir : ss -ltnp | grep :{port}")
+
         proc= start_server(args.output_file, dossier / "server.log")
 
         try:
-            wait_ready(proc, config.get("port", 8000))
+            wait_ready(proc, port)
             for i in range(1, args.nb_runs +1):
                 print(f"-- Run {i}/{args.nb_runs} --")
                 run_bench(i, dossier, config["model"],

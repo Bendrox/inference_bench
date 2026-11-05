@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 from summarize import CLES   # liste des métriques, partagée avec summarize.py
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-EXPE = sys.argv[1] if len(sys.argv) > 1 else "study"
+EXPE = sys.argv[1] if len(sys.argv) > 1 else "study_gpumem"
 RESULTS = PROJECT_ROOT / "results" / EXPE
 PREFIXE = "gpu_"                       # préfixe des dossiers : gpu_0.7, gpu_0.8, ...
 SORTIE = RESULTS / "gpu_sweep.png"
