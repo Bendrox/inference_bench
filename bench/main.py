@@ -8,8 +8,7 @@ from summarize import print_synthese, summarize
 def main():
     args= read_arg()
     
-    nom = "_".join(Path(p).stem for p in (args.model, args.kv_cache, args.engine, args.client))
-    dossier= PROJECT_ROOT / "results" / args.output_dir / nom
+    dossier= PROJECT_ROOT / "results" / args.expe_name /args.output_dir 
     dossier.mkdir(parents=True, exist_ok=True)
     
     args.output_file= dossier / "serve.yaml"

@@ -18,11 +18,6 @@ différence n'est pas significative.
 
 Usage :  uv run python bench/plot.py
 
-Limites:
-- Un seul dossier de config par `gpu_<valeur>` est attendu. S'il y en a plusieurs,
-  le dernier (ordre alphabétique) écrase les autres.
-- Une valeur pour laquelle vLLM a planté n'a pas de `synthese.json` : elle
-  n'apparaît tout simplement pas sur le graphique.
 """
 import json
 import sys
@@ -33,22 +28,17 @@ import matplotlib.pyplot as plt
 from summarize import CLES   # liste des métriques, partagée avec summarize.py
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+EXPE = sys.argv[1] if len(sys.argv) > 1 else "study"
 RESULTS = PROJECT_ROOT / "results"
 PREFIXE = "gpu_"                       # préfixe des dossiers : gpu_0.7, gpu_0.8, ...
 SORTIE = RESULTS / "gpu_sweep.png"
 
 
 def charger() -> dict[float, dict]:
-    """Charge les synthèses de tous les dossiers `results/gpu_<valeur>/*/`.
-
-    La valeur de gpu-memory-utilization est déduite du nom du dossier parent
-    (`gpu_0.7` -> 0.7) : c'est pourquoi le balayage utilise `--output_dir gpu_<valeur>`.
-
-    Retourne {valeur_gpu: synthese}, où `synthese` est le contenu de synthese.json.
-    """
+    """Charge les synthèses de tous les dossiers `results/study/gpu_<valeur>/*/`"""
     data = {}
-    for f in sorted(RESULTS.glob(f"{PREFIXE}*/*/synthese.json")):
-        dossier_gpu = f.parent.parent.name                       # ex. "gpu_0.7"
+    for f in sorted(RESULTS.glob(f"{PREFIXE}*/synthese.json")):
+        dossier_gpu = f.parent.name                       # ex. "gpu_0.7"
         gpu = float(dossier_gpu.removeprefix(PREFIXE))           # ex. 0.7
         data[gpu] = json.loads(f.read_text(encoding="utf-8"))
     return data

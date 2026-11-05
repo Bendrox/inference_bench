@@ -63,6 +63,7 @@ def read_arg():
     parser.add_argument("--num-warmups", type=int, default=None)
     parser.add_argument("--output_dir", type=str, default="expe_1")
     parser.add_argument("--gpu-mem", type=float, default=None)
+    parser.add_argument("--expe-name", type=str, default="study", required=True)
     return parser.parse_args()
     
 if __name__ == "__main__":
