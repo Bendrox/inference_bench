@@ -40,6 +40,13 @@ def assemble_yaml(args):
     print(f"Fusion réussie ! Le fichier a été enregistré sous : {sortie}")
     return fusion
 
+def nb_prompts(args, client: dict, max_conc: int) -> int:
+    """Priorité : --num-prompts, puis --prompts-per-conc, puis le fichier client."""
+    if args.num_prompts:
+        return args.num_prompts
+    if args.prompts_per_conc:
+        return min(client["num-prompts"], max(100, args.prompts_per_conc * max_conc))
+    return client["num-prompts"]
 
 def load_client(args) -> dict:
     with open(PROJECT_ROOT / args.client, encoding="utf-8") as f:
@@ -48,6 +55,7 @@ def load_client(args) -> dict:
     return {
         "max_conc":max_conc,
         "num_prompts": args.num_prompts or client["num-prompts"],
+        "num_prompts": nb_prompts(args, client, max_conc),
         "num_warmups": args.num_warmups or max_conc,
     }
     
@@ -97,6 +105,8 @@ def read_arg():
     parser.add_argument("--output_dir", type=str, default="expe_1")
     parser.add_argument("--gpu-mem", type=float, default=None)
     parser.add_argument("--expe-name", type=str, default=None, required=True)
+    parser.add_argument("--prompts-per-conc", type=int, default=None,
+                    help="nb de requêtes = N x concurrence (borné entre 100 et la valeur du fichier client)")
     return parser.parse_args()
     
 if __name__ == "__main__":

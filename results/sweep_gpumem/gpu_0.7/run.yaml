@@ -1,0 +1,34 @@
+experiment:
+  name: study_gpumem
+  output_dir: gpu_0.7
+  date: '2026-11-05T21:50:22'
+  nb_runs: 3
+sources:
+  model: configs/models/Qwen3.5-9B-FP8-self.yaml
+  kv_cache: configs/kv_cache/fp8-nocache.yaml
+  engine: configs/engine/ctx8k-seqs256-batch8k.yaml
+  client: configs/client/conc256-n3000.yaml
+gpu:
+  name: NVIDIA GeForce RTX 5090
+  memory_total_mib: 32607
+  driver: '616.92'
+  power_limit_w: 448.5
+  power_default_w: 575.0
+serve:
+  host: 127.0.0.1
+  port: 8000
+  gpu-memory-utilization: 0.7
+  seed: 0
+  model: Qwen/Qwen3.5-9B
+  quantization: fp8_per_tensor
+  limit-mm-per-prompt: '{"image": 0, "video": 0}'
+  kv-cache-dtype: fp8
+  no-enable-prefix-caching: true
+  max-model-len: 8192
+  max-num-seqs: 256
+  max-num-batched-tokens: 8192
+client:
+  dataset: sharegpt
+  max_conc: 256
+  num_prompts: 3000
+  num_warmups: 256
