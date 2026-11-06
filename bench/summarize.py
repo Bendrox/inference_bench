@@ -15,6 +15,8 @@ import json, statistics, sys
 from pathlib import Path
 
 CLES = ["output_throughput", "total_token_throughput", "median_ttft_ms", "p99_ttft_ms", "median_tpot_ms", "p99_tpot_ms"]
+# Agrégées seulement si présentes : request_goodput vaut None quand le run est lancé sans --goodput
+CLES_OPTIONNELLES = ["request_throughput", "request_goodput"]
 
 
 def summarize(dossier: Path) -> dict:
@@ -26,11 +28,13 @@ def summarize(dossier: Path) -> dict:
 
     runs = [json.loads(f.read_text(encoding="utf-8")) for f in fichiers]
     synthese = {}
-    for cle in CLES:
-        vals = [r[cle] for r in runs]
+    for cle in CLES + CLES_OPTIONNELLES:
+        vals = [r.get(cle) for r in runs]
+        if None in vals:              # métrique optionnelle absente : on l'ignore
+            continue
         med = statistics.median(vals)
-        synthese[cle] = {"mediane": med, "min": min(vals), "max": max(vals),
-                         "ecart_pct": 100 * (max(vals) - min(vals)) / med}
+        ecart = 100 * (max(vals) - min(vals)) / med if med else None   # goodput peut valoir 0
+        synthese[cle] = {"mediane": med, "min": min(vals), "max": max(vals), "ecart_pct": ecart}
 
     with open(dossier / "synthese.json", "w", encoding="utf-8") as f:
         json.dump(synthese, f, ensure_ascii=False, indent=4)
@@ -40,7 +44,8 @@ def summarize(dossier: Path) -> dict:
 def print_synthese(synthese: dict) -> None:
     print(f"{'métrique':<26}{'médiane':>12}{'min':>12}{'max':>12}{'écart %':>9}")
     for cle, s in synthese.items():
-        print(f"{cle:<26}{s['mediane']:>12.2f}{s['min']:>12.2f}{s['max']:>12.2f}{s['ecart_pct']:>9.1f}")
+        ecart = "-" if s["ecart_pct"] is None else f"{s['ecart_pct']:.1f}"
+        print(f"{cle:<26}{s['mediane']:>12.2f}{s['min']:>12.2f}{s['max']:>12.2f}{ecart:>9}")
 
 if __name__ == "__main__":          # l'usage en ligne de commande continue de marcher
     if len(sys.argv) != 2:

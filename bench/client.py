@@ -12,11 +12,14 @@ def run_bench(i:int, dossier: Path, nom_hf: str, dataset: str, client: dict) -> 
           "--max-concurrency", str(client["max_conc"]),
           "--num-warmups", str(client["num_warmups"]),
           "--temperature", "0", "--ignore-eos",
-          "--save-result", "--result-dir", 
+          "--save-result", "--result-dir",
           str(dossier),
           "--result-filename",
-          f"run{i}.json"
+          f"run{i}.json",
+          "--save-detailed",     # garde ttft/tpot par requête : goodput recalculable pour tout SLO
           ]
+    if client["goodput"]:
+        cmd += ["--goodput", *client["goodput"]]
     with subprocess.Popen(                             # Ouvre un gestionnaire de contexte pour lancer le processus et garantir sa fermeture
         cmd,                                           # Fournit la liste des arguments de la commande système à exécuter
         stdout=subprocess.PIPE,                        # Crée un tuyau (pipe) pour intercepter la sortie standard (les logs du processus)

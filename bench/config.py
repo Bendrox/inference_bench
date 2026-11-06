@@ -57,6 +57,7 @@ def load_client(args) -> dict:
         "num_prompts": args.num_prompts or client["num-prompts"],
         "num_prompts": nb_prompts(args, client, max_conc),
         "num_warmups": args.num_warmups or max_conc,
+        "goodput": args.goodput,   # ex. ["ttft:1000", "tpot:50"], ou None
     }
     
 def get_gpu_info() -> dict:
@@ -107,6 +108,8 @@ def read_arg():
     parser.add_argument("--expe-name", type=str, default=None, required=True)
     parser.add_argument("--prompts-per-conc", type=int, default=None,
                     help="nb de requêtes = N x concurrence (borné entre 100 et la valeur du fichier client)")
+    parser.add_argument("--goodput", nargs="+", default=None,
+                    help="SLO en ms pour le goodput, ex. --goodput ttft:1000 tpot:50")
     return parser.parse_args()
     
 if __name__ == "__main__":
