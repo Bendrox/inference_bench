@@ -70,7 +70,7 @@ Aggregated metrics: output throughput, total throughput, TTFT (median, p99), TPO
 
 ```bash
 uv run python bench/summarize.py results/<expe>/<run>   # re-aggregate a folder
-uv run python bench/plot.py <expe>                      # gpu-mem sweep plots
+uv run python bench/plot/sweep_gpumem.py <expe>         # gpu-mem sweep plots
 ```
 
 ## Tools (`makefile`)

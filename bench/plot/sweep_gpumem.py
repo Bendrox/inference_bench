@@ -16,7 +16,7 @@ Sortie:
 Si l'écart entre deux points est du même ordre que la barre d'erreur, la
 différence n'est pas significative.
 
-Usage :  uv run python bench/plot.py [nom_expe]     (défaut : "study")
+Usage :  uv run python bench/plot/sweep_gpumem.py [nom_expe]     (défaut : "study_gpumem")
 
 """
 import json
@@ -25,9 +25,11 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
+BENCH_DIR = Path(__file__).resolve().parent.parent   # bench/
+sys.path.insert(0, str(BENCH_DIR))                   # pour importer summarize depuis bench/plot/
 from summarize import CLES   # liste des métriques, partagée avec summarize.py
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BENCH_DIR.parent
 EXPE = sys.argv[1] if len(sys.argv) > 1 else "study_gpumem"
 RESULTS = PROJECT_ROOT / "results" / EXPE
 PREFIXE = "gpu_"                       # préfixe des dossiers : gpu_0.7, gpu_0.8, ...
