@@ -1,7 +1,18 @@
 import subprocess
 from pathlib import Path
 
-from config import DATASETS
+
+def profil_to_args(profil: dict) -> list[str]:
+    """{"random-input-len": 256, "ignore-eos": True} -> ["--random-input-len", "256", "--ignore-eos"]"""
+    args = []
+    for cle, val in profil.items():
+        if val is True:                 # option sans valeur (flag) : présente
+            args.append(f"--{cle}")
+        elif val is False:              # flag désactivé : absent de la commande
+            continue
+        else:
+            args += [f"--{cle}", str(val)]
+    return args
 
 def run_bench(i:int, dossier: Path, nom_hf: str, dataset: str, client: dict) -> None:
     cmd= ["vllm", "bench", "serve",
@@ -11,7 +22,7 @@ def run_bench(i:int, dossier: Path, nom_hf: str, dataset: str, client: dict) -> 
           "--num-prompts", str(client["num_prompts"]),
           "--max-concurrency", str(client["max_conc"]),
           "--num-warmups", str(client["num_warmups"]),
-          "--temperature", "0", "--ignore-eos",
+          "--temperature", "0", # "--ignore-eos",
           "--save-result", "--result-dir",
           str(dossier),
           "--result-filename",

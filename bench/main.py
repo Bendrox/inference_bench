@@ -37,7 +37,6 @@ def main():
             for i in range(1, args.nb_runs +1):
                 print(f"-- Run {i}/{args.nb_runs} --")
                 run_bench(i, dossier, config["model"],
-                          args.dataset,
                           client)
         finally:
             stop_server(proc)

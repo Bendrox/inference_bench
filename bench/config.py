@@ -91,7 +91,7 @@ def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
                     "engine": args.engine, "client": args.client, "dataset": args.dataset},
         "gpu": get_gpu_info(),
         "serve": config,
-        "client": {args.client},
+        "client": {client},
     }
     with open(dossier / "run.yaml", "w", encoding="utf-8") as f:
         yaml.safe_dump(run, f, sort_keys=False, allow_unicode=True, default_flow_style=False)
