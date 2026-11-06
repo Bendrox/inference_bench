@@ -1,0 +1,5 @@
+dataset-name: random
+random-input-len: 8192
+random-output-len: 256
+random-range-ratio: 0    
+ignore-eos: true  

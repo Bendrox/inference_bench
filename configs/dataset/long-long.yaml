@@ -1,0 +1,5 @@
+dataset-name: random
+random-input-len: 16384
+random-output-len: 4096  # ISL + OSL must stay ≤ 32800
+random-range-ratio: 0    
+ignore-eos: true  
