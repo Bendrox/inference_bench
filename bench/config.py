@@ -58,7 +58,6 @@ def load_client(args) -> dict:
     max_conc = args.max_conc or client["max-concurrency"]
     return {
         "max_conc":max_conc,
-        "num_prompts": args.num_prompts or client["num-prompts"],
         "num_prompts": nb_prompts(args, client, max_conc),
         "num_warmups": args.num_warmups or max_conc,
         "goodput": args.goodput,   # ex. ["ttft:1000", "tpot:50"], ou None
@@ -69,7 +68,7 @@ def load_client(args) -> dict:
 def get_gpu_info() -> dict:
     """Infos du 1er GPU via nvidia-smi (n'initialise pas CUDA dans ce process).
     Si nvidia-smi est absent ou échoue, retourne {"name": "unknown"} sans planter le bench."""
-    cmd = ["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
+    cmd = ["nvidia-smi",
            "--query-gpu=name,memory.total,driver_version,enforced.power.limit,power.default_limit",
            "--format=csv,noheader,nounits"]
     try:
@@ -91,7 +90,7 @@ def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
                     "engine": args.engine, "client": args.client, "dataset": args.dataset},
         "gpu": get_gpu_info(),
         "serve": config,
-        "client": {client},
+        "client": client,
     }
     with open(dossier / "run.yaml", "w", encoding="utf-8") as f:
         yaml.safe_dump(run, f, sort_keys=False, allow_unicode=True, default_flow_style=False)
@@ -118,10 +117,7 @@ def read_arg():
                     help="SLO en ms pour le goodput, ex. --goodput ttft:1000 tpot:50")
     return parser.parse_args()
     
-if __name__ == "__main__":
-    args=read_arg()
-    assemble_yaml(args)
-    
+
 if __name__ == "__main__":
     args = read_arg()
     config = assemble_yaml(args)
