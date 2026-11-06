@@ -7,7 +7,11 @@ from datetime import datetime
 PROJECT_ROOT=Path(__file__).resolve().parent.parent
 CONFIG_PATH= PROJECT_ROOT / "configs"
 BASE_FILE=CONFIG_PATH / "base.yaml"
-DATASETS = {"sharegpt": "data/ShareGPT_V3_unfiltered_cleaned_split.json"}
+
+def load_dataset(args):
+    """Lit le YAML du profil : chaque clé est un argument de `vllm bench serve`."""
+    with open(PROJECT_ROOT / args.dataset, encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 def get_server_files_path(args) -> list[Path]:
     "Donne ordre de prio croissante : un fichier bas écrase le précédent"
@@ -58,6 +62,8 @@ def load_client(args) -> dict:
         "num_prompts": nb_prompts(args, client, max_conc),
         "num_warmups": args.num_warmups or max_conc,
         "goodput": args.goodput,   # ex. ["ttft:1000", "tpot:50"], ou None
+        "profil": load_dataset(args),
+        
     }
     
 def get_gpu_info() -> dict:
@@ -82,10 +88,10 @@ def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
                        "date": datetime.now().isoformat(timespec="seconds"),
                        "nb_runs": args.nb_runs},
         "sources": {"model": args.model, "kv_cache": args.kv_cache,
-                    "engine": args.engine, "client": args.client},
+                    "engine": args.engine, "client": args.client, "dataset": args.dataset},
         "gpu": get_gpu_info(),
         "serve": config,
-        "client": {"dataset": args.dataset, **client},
+        "client": {args.client},
     }
     with open(dossier / "run.yaml", "w", encoding="utf-8") as f:
         yaml.safe_dump(run, f, sort_keys=False, allow_unicode=True, default_flow_style=False)
@@ -95,7 +101,7 @@ def read_arg():
     parser = argparse.ArgumentParser(description="Assemble les configs pour un benchmark")
     parser.add_argument("--output-file", default= "global_config.yaml")
     parser.add_argument("--model", default= "configs/models/Qwen3.5-9B-FP8-self.yaml")
-    parser.add_argument("--dataset", default= "sharegpt", choices=DATASETS)
+    parser.add_argument("--dataset", default="configs/dataset/sharegpt.yaml")
     parser.add_argument("--kv_cache", default= "configs/kv_cache/fp8-nocache.yaml")
     parser.add_argument("--engine", default= "configs/engine/ctx8k-seqs256-batch8k.yaml")
     parser.add_argument("--client", default= "configs/client/conc256-n3000.yaml")
