@@ -11,3 +11,14 @@ wheels/
 
 /data
 /doc
+# Résultats : on ignore tout (raw runN.json, server.log = plusieurs Go)
+# sauf les fichiers légers utiles pour le portfolio
+/results/**
+!/results/**/
+!/results/**/synthese.json
+!/results/**/run.yaml
+!/results/**/bench_run*.txt
+!/results/**/*.png
+
+# Secrets
+.env

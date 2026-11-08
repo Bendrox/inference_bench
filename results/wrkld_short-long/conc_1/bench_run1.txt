@@ -1,0 +1,119 @@
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x78266471b600>, trust_remote_code=False, seed=0, num_prompts=30, dataset_name='random', no_stream=False, dataset_path=None, no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=256, random_output_len=4096, random_range_ratio='0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/completions', header=None, max_concurrency=1, model='Qwen/Qwen3.5-9B', input_len=None, output_len=None, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=False, num_warmups=1, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/home/eldiablo92/ai_projects/inference_bench/results/wrkld_short-long/conc_1', result_filename='run1.json', ignore_eos=True, self_timed=None, percentile_metrics=None, metric_percentiles='99', goodput=['ttft:1000', 'tpot:50'], request_id_prefix='bench-d9c62e19-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', configure_logging=True, pylogging_config_file=None))
+(MainProcess pid=21568) INFO 11-07 11:02:46 [utils.py:88] Sampling input_len from [256, 256] and output_len from [4096, 4096]
+Starting initial single prompt test run...
+Skipping endpoint ready check.
+Warming up with 1 requests...
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|██████████| 1/1 [00:37<00:00, 37.34s/it]
+100%|██████████| 1/1 [00:37<00:00, 37.34s/it]
+Warmup run completed.
+Starting main benchmark run...
+Traffic request rate: inf
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: 1
+
+  0%|          | 0/30 [00:00<?, ?it/s]
+  3%|▎         | 1/30 [00:38<18:36, 38.51s/it]
+  7%|▋         | 2/30 [01:15<17:28, 37.43s/it]
+ 10%|█         | 3/30 [01:52<16:51, 37.48s/it]
+ 13%|█▎        | 4/30 [02:29<16:04, 37.08s/it]
+ 17%|█▋        | 5/30 [03:06<15:27, 37.08s/it]
+ 20%|██        | 6/30 [03:43<14:50, 37.10s/it]
+ 23%|██▎       | 7/30 [04:21<14:17, 37.28s/it]
+ 27%|██▋       | 8/30 [04:58<13:40, 37.29s/it]
+ 30%|███       | 9/30 [05:35<13:02, 37.25s/it]
+ 33%|███▎      | 10/30 [06:12<12:25, 37.28s/it]
+ 37%|███▋      | 11/30 [06:48<11:41, 36.90s/it]
+ 40%|████      | 12/30 [07:26<11:06, 37.04s/it]
+ 43%|████▎     | 13/30 [08:02<10:26, 36.88s/it]
+ 47%|████▋     | 14/30 [08:39<09:49, 36.86s/it]
+ 50%|█████     | 15/30 [09:16<09:11, 36.77s/it]
+ 53%|█████▎    | 16/30 [09:54<08:39, 37.14s/it]
+ 57%|█████▋    | 17/30 [10:30<08:00, 36.98s/it]
+ 60%|██████    | 18/30 [11:08<07:25, 37.12s/it]
+ 63%|██████▎   | 19/30 [11:44<06:46, 36.99s/it]
+ 67%|██████▋   | 20/30 [12:22<06:11, 37.18s/it]
+ 70%|███████   | 21/30 [12:59<05:32, 36.99s/it]
+ 73%|███████▎  | 22/30 [13:36<04:56, 37.05s/it]
+ 77%|███████▋  | 23/30 [14:12<04:17, 36.81s/it]
+ 80%|████████  | 24/30 [14:49<03:41, 36.94s/it]
+ 83%|████████▎ | 25/30 [15:28<03:07, 37.40s/it]
+ 87%|████████▋ | 26/30 [16:06<02:30, 37.60s/it]
+ 90%|█████████ | 27/30 [16:43<01:52, 37.61s/it]
+ 93%|█████████▎| 28/30 [17:21<01:15, 37.70s/it]
+ 97%|█████████▋| 29/30 [17:59<00:37, 37.54s/it]
+100%|██████████| 30/30 [18:37<00:00, 37.72s/it]
+100%|██████████| 30/30 [18:37<00:00, 37.24s/it]
+
+                             Output tokens per second
+  140 +---------------------------------------------------------------------+
+      |                                                                     |
+      |                                                                     |
+  120 |**************************************************** ************    |
+      |*****************************************************************    |
+  100 |*****************************************************************    |
+      |** ***  ** **** *** **   * * *   **  *** **** *   *********** ***    |
+      |                                                                *    |
+   80 |                                                                *    |
+      |                                                                *    |
+      |                                                                *    |
+   60 |                                                                *    |
+      |                                                                *    |
+      |                                                                *    |
+   40 |                                                                *    |
+      |                                                                *    |
+   20 |                                                                *    |
+      |                                                                *    |
+      |                                                                *    |
+    0 +---------------------------------------------------------------------+
+      0          200        400         600         800        1000        1200
+
+                          Concurrent requests per second
+    2 +---------------------------------------------------------------------+
+      | * *  * * * * * *  * * * * * * *  * * * * * *  * * * * *  * * *      |
+      | * *  * * * * * *  * * * * * * *  * * * * * *  * * * * *  * * *      |
+      | * *  * * * * * *  * * * * * * *  * * * * * *  * * * * *  * * *      |
+      | * *  * * * * * *  * * * * * * *  * * * * * *  * * * * *  * * *      |
+  1.5 | * * ** * * * * * ** * * * * * *  * * * * * ** * * * * * ** * *      |
+      | * * ** * * * * * ** * * * * * *  * * * * * ** * * * * * ** * *      |
+      | * * ** * * * * * ** * * * * * *  * * * * * ** * * * * * ** * *      |
+      | * * ** * * * * * ** * * * * * *  * * * * * ** * * * * * ** * *      |
+    1 |*****************************************************************    |
+      |                                                                *    |
+      |                                                                *    |
+      |                                                                *    |
+      |                                                                *    |
+  0.5 |                                                                *    |
+      |                                                                *    |
+      |                                                                *    |
+      |                                                                *    |
+      |                                                                *    |
+    0 +---------------------------------------------------------------------+
+      0          200        400         600         800        1000        1200
+============ Serving Benchmark Result ============
+Successful requests:                     30        
+Failed requests:                         0         
+Maximum request concurrency:             1         
+Benchmark duration (s):                  1117.18   
+Total input tokens:                      7680      
+Total generated tokens:                  122880    
+Request throughput (req/s):              0.03      
+Request goodput (req/s):                 0.03      
+Output token throughput (tok/s):         109.99    
+Peak output token throughput (tok/s):    121.00    
+Peak concurrent requests:                2.00      
+Total token throughput (tok/s):          116.87    
+---------------Time to First Token----------------
+Mean TTFT (ms):                          37.54     
+Median TTFT (ms):                        36.72     
+P99 TTFT (ms):                           44.83     
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          9.08      
+Median TPOT (ms):                        9.08      
+P99 TPOT (ms):                           9.39      
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           9.08      
+Median ITL (ms):                         9.06      
+P99 ITL (ms):                            10.62     
+==================================================

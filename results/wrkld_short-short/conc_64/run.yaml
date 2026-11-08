@@ -1,0 +1,43 @@
+experiment:
+  name: wrkld_short-short
+  output_dir: conc_64
+  date: '2026-11-07T10:44:15'
+  nb_runs: 3
+sources:
+  model: configs/models/Qwen3.5-9B-FP8-self.yaml
+  kv_cache: configs/kv_cache/fp8-nocache.yaml
+  engine: configs/engine/ctx32k-seqs256-batch8k.yaml
+  client: configs/client/conc256-n3000.yaml
+  dataset: configs/dataset/short-short.yaml
+gpu:
+  name: NVIDIA GeForce RTX 5090
+  memory_total_mib: 32607
+  driver: '616.92'
+  power_limit_w: 448.5
+  power_default_w: 575.0
+serve:
+  host: 127.0.0.1
+  port: 8000
+  gpu-memory-utilization: 0.9
+  seed: 0
+  model: Qwen/Qwen3.5-9B
+  quantization: fp8_per_tensor
+  limit-mm-per-prompt: '{"image": 0, "video": 0}'
+  kv-cache-dtype: fp8
+  no-enable-prefix-caching: true
+  max-model-len: 32800
+  max-num-seqs: 256
+  max-num-batched-tokens: 8192
+client:
+  max_conc: 64
+  num_prompts: 640
+  num_warmups: 64
+  goodput:
+  - ttft:1000
+  - tpot:50
+  profil:
+    dataset-name: random
+    random-input-len: 256
+    random-output-len: 256
+    random-range-ratio: 0
+    ignore-eos: true
