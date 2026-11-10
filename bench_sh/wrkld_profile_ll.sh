@@ -14,7 +14,6 @@ for p in $PROFILS; do
     #   ";" sépare des commandes écrites sur une même ligne.
     if [ $c -le 4 ]; then N="--num-prompts 30"; else N="--prompts-per-conc 10"; fi
 
-    # "\" en fin de ligne : la commande continue sur la ligne suivante (rien après, pas même un espace).
     # $c, $p, $ENGINE : remplacés par la valeur de la variable.
     # $N sans guillemets : bash découpe la valeur sur les espaces -> deux arguments ("--num-prompts" puis "30").
     #   Avec "$N", ce serait un seul argument "--num-prompts 30". Même chose pour $SLO.

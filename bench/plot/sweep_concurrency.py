@@ -13,36 +13,16 @@ Le graphique 3 n'affiche le goodput que si les runs ont été lancés avec --goo
 
 Usage :  uv run python bench/plot/sweep_concurrency.py [nom_expe]   (défaut : "sweep_concurrency_goodput")
 """
-import json
 import sys
-from pathlib import Path
 
 import matplotlib.pyplot as plt
-import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+from common import RESULTS, axe_concurrence, charger, lire_slo, sauver
+
 EXPE = sys.argv[1] if len(sys.argv) > 1 else "sweep_concurrency_goodput"
-RESULTS = PROJECT_ROOT / "results" / EXPE
+DOSSIER = RESULTS / EXPE
 PREFIXE = "conc_"                      # dossiers : conc_1, conc_2, ...
-SORTIE = RESULTS / "conc_sweep.png"
-
-
-def charger() -> dict[int, dict]:
-    """Retourne {concurrence: synthese}, la concurrence étant lue dans le nom du dossier."""
-    data = {}
-    for f in RESULTS.glob(f"{PREFIXE}*/synthese.json"):
-        conc = int(f.parent.name.removeprefix(PREFIXE))
-        data[conc] = json.loads(f.read_text(encoding="utf-8"))
-    return dict(sorted(data.items()))
-
-
-def lire_slo() -> dict[str, float]:
-    """Lit le SLO dans le run.yaml d'un des dossiers : ["ttft:1000", "tpot:50"] -> {"ttft": 1000, "tpot": 50}."""
-    run_yaml = next(RESULTS.glob(f"{PREFIXE}*/run.yaml"), None)
-    if run_yaml is None:
-        return {}
-    goodput = yaml.safe_load(run_yaml.read_text(encoding="utf-8"))["client"].get("goodput") or []
-    return {cle: float(val) for cle, val in (g.split(":") for g in goodput)}
+SORTIE = DOSSIER / "conc_sweep.png"
 
 
 def tracer_latence(ax, data: dict[int, dict], cle: str, seuil: float | None) -> None:
@@ -64,13 +44,10 @@ def tracer_latence(ax, data: dict[int, dict], cle: str, seuil: float | None) -> 
 
 def tracer_goodput(ax, data: dict[int, dict]) -> None:
     """Débit total et goodput (req/s) en fonction de la concurrence."""
-    concs = list(data)
     for cle in ["request_throughput", "request_goodput"]:
         if all(cle in s for s in data.values()):
-            ax.plot(concs, [s[cle]["mediane"] for s in data.values()], marker="o", label=cle)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(concs, [str(c) for c in concs])
-    ax.set_xlabel("max-concurrency")
+            ax.plot(list(data), [s[cle]["mediane"] for s in data.values()], marker="o", label=cle)
+    axe_concurrence(ax, data)
     ax.set_ylabel("req/s")
     ax.set_title("Débit total vs goodput")
     ax.legend()
@@ -78,20 +55,15 @@ def tracer_goodput(ax, data: dict[int, dict]) -> None:
 
 
 def main() -> None:
-    data = charger()
-    if not data:
-        sys.exit(f"Aucun synthese.json trouvé dans {RESULTS}/{PREFIXE}*/")
-    slo = lire_slo()
+    data = charger(DOSSIER, PREFIXE)
+    slo = lire_slo(DOSSIER)
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     tracer_latence(axes[0], data, "p99_ttft_ms", slo.get("ttft"))
     tracer_latence(axes[1], data, "p99_tpot_ms", slo.get("tpot"))
     tracer_goodput(axes[2], data)
 
-    fig.suptitle(f"Sweep de concurrence : {EXPE} (point = médiane des runs)")
-    fig.tight_layout()
-    fig.savefig(SORTIE, dpi=150)
-    print(f"Graphique enregistré : {SORTIE}")
+    sauver(fig, SORTIE, f"Sweep de concurrence : {EXPE} (point = médiane des runs)")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 """
-plot.py : trace l'effet de `gpu-memory-utilization` sur les métriques du benchmark.
+sweep_gpumem.py : trace l'effet de `gpu-memory-utilization` sur les métriques du benchmark.
 
 Chaque lancement produit (voir main.py et summarize.py) :
     results/<expe>/gpu_<valeur>/synthese.json
@@ -19,60 +19,35 @@ différence n'est pas significative.
 Usage :  uv run python bench/plot/sweep_gpumem.py [nom_expe]     (défaut : "study_gpumem")
 
 """
-import json
 import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-BENCH_DIR = Path(__file__).resolve().parent.parent   # bench/
-sys.path.insert(0, str(BENCH_DIR))                   # pour importer summarize depuis bench/plot/
+from common import RESULTS, charger, errorbar, sauver
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))   # bench/, pour importer summarize
 from summarize import CLES   # liste des métriques, partagée avec summarize.py
 
-PROJECT_ROOT = BENCH_DIR.parent
 EXPE = sys.argv[1] if len(sys.argv) > 1 else "study_gpumem"
-RESULTS = PROJECT_ROOT / "results" / EXPE
+DOSSIER = RESULTS / EXPE
 PREFIXE = "gpu_"                       # préfixe des dossiers : gpu_0.7, gpu_0.8, ...
-SORTIE = RESULTS / "gpu_sweep.png"
-
-
-def charger() -> dict[float, dict]:
-    """Charge les synthèses de tous les dossiers `results/<expe>/gpu_<valeur>/`.
-
-    La valeur de gpu-memory-utilization est déduite du nom du dossier
-    (`gpu_0.7` -> 0.7) : c'est pourquoi le balayage utilise `--output_dir gpu_<valeur>`.
-    Retourne {valeur_gpu: synthese}.
-    """
-    data = {}
-    for f in sorted(RESULTS.glob(f"{PREFIXE}*/synthese.json")):
-        dossier_gpu = f.parent.name                       # ex. "gpu_0.7"
-        gpu = float(dossier_gpu.removeprefix(PREFIXE))           # ex. 0.7
-        data[gpu] = json.loads(f.read_text(encoding="utf-8"))
-    return data
+SORTIE = DOSSIER / "gpu_sweep.png"
 
 
 def tracer_metrique(ax, data: dict[float, dict], cle: str) -> None:
-    """Trace une métrique sur l'axe `ax` : médiane + barre d'erreur min/max.
-
-    `yerr` de matplotlib attend les longueurs *relatives* à la médiane
-    (vers le bas, vers le haut), pas les valeurs absolues min et max.
-    """
-    xs = sorted(data)
-    med = [data[x][cle]["mediane"] for x in xs]
-    vers_bas = [data[x][cle]["mediane"] - data[x][cle]["min"] for x in xs]
-    vers_haut = [data[x][cle]["max"] - data[x][cle]["mediane"] for x in xs]
-
-    ax.errorbar(xs, med, yerr=[vers_bas, vers_haut], marker="o", capsize=4)
+    """Trace une métrique sur l'axe `ax` : médiane + barre d'erreur min/max."""
+    errorbar(ax, {gpu: s[cle] for gpu, s in data.items()}, capsize=4)
     ax.set_title(cle)
     ax.set_xlabel("gpu-memory-utilization")
-    ax.set_xticks(xs)                  # une graduation par valeur testée
+    ax.set_xticks(list(data))          # une graduation par valeur testée
     ax.grid(alpha=0.3)
 
 
 def main() -> None:
-    data = charger()
-    if not data:
-        sys.exit(f"Aucun synthese.json trouvé dans {RESULTS}/{PREFIXE}*/")
+    # La valeur de gpu-memory-utilization est lue dans le nom du dossier (gpu_0.7 -> 0.7) :
+    # c'est pourquoi le balayage utilise `--output_dir gpu_<valeur>`.
+    data = charger(DOSSIER, PREFIXE, float)
 
     # 6 métriques -> grille 2 lignes x 3 colonnes. Si CLES change de taille,
     # adapter la grille (zip s'arrête à la plus courte des deux séquences).
@@ -80,11 +55,8 @@ def main() -> None:
     for ax, cle in zip(axes.flat, CLES):
         tracer_metrique(ax, data, cle)
 
-    fig.suptitle("Effet de gpu-memory-utilization "
-                 "(point = médiane, barre = min/max sur les runs)")
-    fig.tight_layout()
-    fig.savefig(SORTIE, dpi=150)
-    print(f"Graphique enregistré : {SORTIE}")
+    sauver(fig, SORTIE, "Effet de gpu-memory-utilization "
+                        "(point = médiane, barre = min/max sur les runs)")
 
 
 if __name__ == "__main__":
