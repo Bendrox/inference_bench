@@ -1,7 +1,7 @@
-# Workload profiling : profil × concurrence, setup figé (voir doc/06).
+# Workload profiling : profil × concurrence, setup figé 
 # Phase 1 : bash bench_sh/wrkld_profile.sh
 # Phase 2 : PROFILS="real-court-court real-court-long real-long-court" bash bench_sh/wrkld_profile.sh
-PROFILS=${PROFILS:-"short-short short-long long-short long-long"}
+PROFILS=${PROFILS:-"short-short short-long long-short"}
 ENGINE=configs/engine/ctx32k-seqs256-batch8k.yaml
 SLO="ttft:1000 tpot:50"
 
