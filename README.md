@@ -59,7 +59,7 @@ configs/base.yaml → configs/models/*.yaml → configs/kv_cache/*.yaml → conf
 
 ```
 results/<expe-name>/<output_dir>/
-├── run.yaml          # full snapshot: server config, client, GPU, date
+├── run.yaml          # full snapshot: server config, client, GPU, OS, date
 ├── server.log        # vLLM log
 ├── run{1..N}.json    # raw vllm bench serve results
 ├── bench_run{i}.txt  # console output

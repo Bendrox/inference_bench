@@ -8,6 +8,11 @@ sources:
   kv_cache: configs/kv_cache/fp8-nocache.yaml
   engine: configs/engine/ctx8k-seqs512-batch8k.yaml
   client: configs/client/conc256-n3000.yaml
+os:
+  host: Windows + WSL
+  distro: Ubuntu
+  kernel: unknown
+  wsl: true
 gpu:
   name: NVIDIA GeForce RTX 5090
   memory_total_mib: 32607

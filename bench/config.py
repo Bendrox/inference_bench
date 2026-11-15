@@ -1,6 +1,7 @@
 import yaml
 from pathlib import Path
 import argparse
+import platform
 import subprocess
 from datetime import datetime
 
@@ -79,6 +80,17 @@ def get_gpu_info() -> dict:
     except (OSError, subprocess.CalledProcessError, ValueError, IndexError):
         return {"name": "unknown"}
 
+def get_os_info() -> dict:
+    """OS de la machine de bench. Sous WSL, le noyau Linux tourne sur Windows
+    (release du type '...-microsoft-standard-WSL2') : on le signale explicitement."""
+    try:
+        distro = platform.freedesktop_os_release().get("PRETTY_NAME", "unknown")
+    except OSError:
+        distro = "unknown"
+    wsl = "microsoft" in platform.release().lower()
+    return {"host": "Windows + WSL" if wsl else platform.system(),
+            "distro": distro, "kernel": platform.release(), "wsl": wsl}
+
 def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
     """Snapshot complet de l'expérience dans <dossier>/run.yaml (par sections).
     `config` = config vLLM fusionnée (celle passée à `vllm serve --config`), `client` = valeurs résolues de load_client."""
@@ -88,6 +100,7 @@ def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
                        "nb_runs": args.nb_runs},
         "sources": {"model": args.model, "kv_cache": args.kv_cache,
                     "engine": args.engine, "client": args.client, "dataset": args.dataset},
+        "os": get_os_info(),
         "gpu": get_gpu_info(),
         "serve": config,
         "client": client,

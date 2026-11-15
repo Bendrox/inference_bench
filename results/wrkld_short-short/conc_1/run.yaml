@@ -9,6 +9,11 @@ sources:
   engine: configs/engine/ctx32k-seqs256-batch8k.yaml
   client: configs/client/conc256-n3000.yaml
   dataset: configs/dataset/short-short.yaml
+os:
+  host: Windows + WSL
+  distro: Ubuntu
+  kernel: unknown
+  wsl: true
 gpu:
   name: NVIDIA GeForce RTX 5090
   memory_total_mib: 32607
