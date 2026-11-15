@@ -11,7 +11,7 @@ wheels/
 
 /data
 /doc
-# Résultats : on ignore tout (raw runN.json, server.log = plusieurs Go)
+# Résultats : results/<os>/<expe>/<run>/ (os = wsl | linux) ignore tout (raw runN.json, server.log en Go)
 # sauf les fichiers légers utiles pour le portfolio
 /results/**
 !/results/**/
