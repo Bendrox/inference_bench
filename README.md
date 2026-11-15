@@ -85,5 +85,6 @@ Planned:
 - GPU power limit sweep and its impact.
 - Interpretation of the results.
 - Native Linux benchmark, compared with Windows + WSL.
+- Multi-GPU benchmark: tensor (TP), data (DP) and pipeline (PP) parallelism.
 
 Research notes live in `doc/` (not versioned).
