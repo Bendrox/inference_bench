@@ -1,20 +1,24 @@
 """
 common.py : fonctions partagées par les scripts de bench/plot/.
 
-Convention des résultats : `results/<expe>/<prefixe><valeur>/synthese.json`
+Convention des résultats : `results/<os>/<expe>/<prefixe><valeur>/synthese.json`
+(<os> = wsl ou linux : OS courant par défaut, forcé avec BENCH_OS=wsl)
 (ex. conc_16, gpu_0.7), la valeur balayée étant lue dans le nom du dossier.
 
 Import depuis un script de bench/plot/ :  from common import RESULTS, charger, ...
 (python ajoute le dossier du script lancé à sys.path, aucun hack nécessaire).
 """
 import json
+import os
+import platform
 import sys
 from pathlib import Path
 
 import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-RESULTS = PROJECT_ROOT / "results"
+OS_COURANT = "wsl" if "microsoft" in platform.release().lower() else "linux"   # même règle que config.os_tag()
+RESULTS = PROJECT_ROOT / "results" / os.environ.get("BENCH_OS", OS_COURANT)
 
 
 def charger(expe: Path, prefixe: str, type_val=int) -> dict:

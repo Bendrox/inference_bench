@@ -80,6 +80,10 @@ def get_gpu_info() -> dict:
     except (OSError, subprocess.CalledProcessError, ValueError, IndexError):
         return {"name": "unknown"}
 
+def os_tag() -> str:
+    """Sous-dossier de results/ : 'wsl' ou 'linux', pour ne pas mélanger les deux environnements."""
+    return "wsl" if "microsoft" in platform.release().lower() else "linux"
+
 def get_os_info() -> dict:
     """OS de la machine de bench. Sous WSL, le noyau Linux tourne sur Windows
     (release du type '...-microsoft-standard-WSL2') : on le signale explicitement."""

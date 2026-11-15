@@ -54,8 +54,10 @@ configs/base.yaml → configs/models/*.yaml → configs/kv_cache/*.yaml → conf
 
 ## Results
 
+Results are split by environment, detected automatically: `results/wsl/` (Windows + WSL) or `results/linux/` (native). An existing run is never overwritten. Plots read the current OS folder; use `BENCH_OS=wsl` to plot the other one.
+
 ```
-results/<expe-name>/<output_dir>/
+results/<os>/<expe-name>/<output_dir>/
 ├── run.yaml          # full snapshot: server config, client, GPU, OS, date
 ├── server.log        # vLLM log (not versioned)
 ├── run{1..N}.json    # raw vllm bench serve results (not versioned)

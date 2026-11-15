@@ -4,14 +4,17 @@ import tempfile
 from pathlib import Path
 
 from client import run_bench
-from config import PROJECT_ROOT, assemble_yaml, load_client, read_arg, write_run_yaml
+from config import PROJECT_ROOT, assemble_yaml, load_client, os_tag, read_arg, write_run_yaml
 from server import start_server, stop_server, wait_ready
 from summarize import print_synthese, summarize
 
 def main():
     args= read_arg()
     
-    dossier= PROJECT_ROOT / "results" / args.expe_name /args.output_dir 
+    dossier= PROJECT_ROOT / "results" / os_tag() / args.expe_name / args.output_dir
+    if (dossier / "synthese.json").exists():
+        sys.exit(f"ERREUR : {dossier} contient déjà des résultats, on n'écrase pas. "
+                 f"Change --expe-name / --output_dir ou supprime le dossier.")
     dossier.mkdir(parents=True, exist_ok=True)
     
     # vllm serve exige un fichier --config : on le génère dans un dossier temporaire
