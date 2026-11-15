@@ -1,9 +1,22 @@
-import os, signal, subprocess, time, urllib.request, urllib.error
+import os, signal, subprocess, sysconfig, time, urllib.request, urllib.error
 from pathlib import Path
 
 
 from pathlib import Path
 import subprocess
+
+# nvcc (CUDA toolkit) fourni par le paquet pip nvidia-cuda-nvcc, dans le venv.
+# FlashInfer en a besoin pour compiler ses noyaux ; sans lui sur le PATH, vLLM plante
+# ("FlashInfer backend is not available"). Sous WSL un toolkit système le fournissait déjà.
+CUDA_DIR = Path(sysconfig.get_paths()["purelib"]) / "nvidia" / "cu13"
+
+def server_env() -> dict:
+    """Environnement du serveur : celui du shell + le nvcc du venv s'il existe."""
+    env = dict(os.environ)
+    if (CUDA_DIR / "bin" / "nvcc").exists():
+        env["PATH"] = f"{CUDA_DIR / 'bin'}:{env['PATH']}"
+        env.setdefault("CUDA_HOME", str(CUDA_DIR))
+    return env
 
 def start_server(serve_yaml: Path, log_path: Path) -> subprocess.Popen:
     """
@@ -19,6 +32,7 @@ def start_server(serve_yaml: Path, log_path: Path) -> subprocess.Popen:
     # Lance le processus externe de manière asynchrone (le script Python continue son exécution).
     return subprocess.Popen(
         ["vllm", "serve", "--config", str(serve_yaml)],  # Commande système exécutée dans le terminal
+        env=server_env(),                                # PATH avec nvcc (voir server_env)
         stdout=log,                                      # Redirige la sortie standard (les messages normaux) vers le fichier de log
         stderr=subprocess.STDOUT,                        # Fusionne le flux d'erreurs (stderr) avec stdout : 
                                                          # tous les messages d'erreur sont ainsi écrits dans le même fichier de log
