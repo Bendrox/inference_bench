@@ -1,7 +1,7 @@
 experiment:
   name: sweep_concurrency_slo
   output_dir: conc_4
-  date: '2026-11-15T21:53:55'
+  date: '2026-11-15T22:28:22'
   nb_runs: 3
 sources:
   model: configs/models/Qwen3.5-9B-FP8-self.yaml
