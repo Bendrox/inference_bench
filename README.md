@@ -7,7 +7,6 @@ Each run starts a vLLM server from a composed config, drives it with `vllm bench
 
 ```bash
 uv sync
-make is-cuda-available-device   # check the GPU is visible
 ```
 
 ## Running a benchmark
@@ -22,11 +21,6 @@ bash bench_sh/wrkld_profile.sh     # workload profiles × concurrency (32k conte
 bash bench_sh/wrkld_profile_ll.sh  # long-long profile (lighter sweep)
 ```
 
-Each script calls `bench/main.py` once per point. A single run:
-
-```bash
-uv run python bench/main.py --expe-name my_expe --output_dir run_1
-```
 
 Useful options:
 
@@ -71,12 +65,6 @@ results/<expe-name>/<output_dir>/
 
 Aggregated metrics: output throughput, total throughput, TTFT (median, p99), TPOT (median, p99).
 
-```bash
-uv run python bench/summarize.py results/<expe>/<run>   # re-aggregate a folder
-uv run python bench/plot/sweep_gpumem.py <expe>         # gpu-mem sweep plots
-uv run python bench/plot/sweep_concurrency.py <expe>    # concurrency sweep: throughput vs latency, goodput
-uv run python bench/plot/workload_profile.py            # all wrkld_* profiles on one figure
-```
 
 ## Tools (`makefile`)
 
