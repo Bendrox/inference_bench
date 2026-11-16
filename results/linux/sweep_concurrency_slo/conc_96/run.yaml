@@ -1,7 +1,7 @@
 experiment:
   name: sweep_concurrency_slo
   output_dir: conc_96
-  date: '2026-11-15T22:41:48'
+  date: '2026-11-16T23:17:08'
   nb_runs: 3
 sources:
   model: configs/models/Qwen3.5-9B-FP8-self.yaml
@@ -12,13 +12,13 @@ sources:
 os:
   host: Linux
   distro: Ubuntu 24.04.3 LTS
-  kernel: 6.14.0-37-generic
+  kernel: 7.0.0-43-generic
   wsl: false
 gpu:
   name: NVIDIA GeForce RTX 5090
   memory_total_mib: 32607
-  driver: 590.48.01
-  power_limit_w: 575.0
+  driver: 595.99.02
+  power_limit_w: 510.0
   power_default_w: 575.0
 serve:
   host: 127.0.0.1

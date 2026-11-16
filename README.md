@@ -22,20 +22,6 @@ bash bench_sh/wrkld_profile_ll.sh  # long-long profile (lighter sweep)
 ```
 
 
-Useful options:
-
-| Option | Purpose | Default |
-|---|---|---|
-| `--expe-name` | Experiment name (required) | — |
-| `--output_dir` | Run subfolder | `expe_1` |
-| `--model` / `--kv_cache` / `--engine` / `--client` / `--dataset` | Config files to compose | see `bench/config.py` |
-| `--max-conc` | Max concurrency (overrides the client file) | client file |
-| `--num-prompts` / `--prompts-per-conc` | Number of requests (fixed, or N × concurrency) | client file |
-| `--gpu-mem` | `gpu-memory-utilization` | `0.9` |
-| `--nb-runs` | Repetitions to measure noise | `3` |
-| `--num-warmups` | Warmup requests | max concurrency |
-| `--goodput` | SLO in ms, e.g. `ttft:1000 tpot:50` | none |
-
 ## Composable configs
 
 The server config is merged in this order (later files override earlier ones):

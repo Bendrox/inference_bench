@@ -1,0 +1,46 @@
+experiment:
+  name: sweep_concurrency_slo
+  output_dir: conc_8
+  date: '2026-11-16T19:38:09'
+  nb_runs: 3
+sources:
+  model: configs/models/Qwen3.5-9B-FP8-self.yaml
+  kv_cache: configs/kv_cache/fp8-nocache.yaml
+  engine: configs/engine/ctx8k-seqs512-batch8k.yaml
+  client: configs/client/conc256-n3000.yaml
+  dataset: configs/dataset/sharegpt.yaml
+os:
+  host: Linux
+  distro: Ubuntu 24.04.3 LTS
+  kernel: 6.14.0-37-generic
+  wsl: false
+gpu:
+  name: NVIDIA GeForce RTX 5090
+  memory_total_mib: 32607
+  driver: 590.48.01
+  power_limit_w: 448.0
+  power_default_w: 575.0
+serve:
+  host: 127.0.0.1
+  port: 8000
+  gpu-memory-utilization: 0.9
+  seed: 0
+  model: Qwen/Qwen3.5-9B
+  quantization: fp8_per_tensor
+  limit-mm-per-prompt: '{"image": 0, "video": 0}'
+  kv-cache-dtype: fp8
+  no-enable-prefix-caching: true
+  max-model-len: 8192
+  max-num-seqs: 512
+  max-num-batched-tokens: 8192
+client:
+  max_conc: 8
+  num_prompts: 100
+  num_warmups: 8
+  goodput:
+  - ttft:1000
+  - tpot:50
+  profil:
+    dataset-name: sharegpt
+    dataset-path: data/ShareGPT_V3_unfiltered_cleaned_split.json
+    ignore-eos: true
