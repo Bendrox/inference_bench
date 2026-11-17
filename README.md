@@ -70,9 +70,7 @@ Planned:
 - Quantization BF16 → FP8 / AWQ / GPTQ / NVFP4: speed vs quality.
 - Agentic workload profiling.
 - Pareto curve: throughput vs latency.
-- GPU power limit sweep and its impact.
 - Interpretation of the results.
-- Native Linux benchmark, compared with Windows + WSL.
 - Multi-GPU benchmark: tensor (TP), data (DP) and pipeline (PP) parallelism.
 
 Research notes live in `doc/` (not versioned).
