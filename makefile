@@ -1,5 +1,8 @@
 .IPHONY : main.py
 
+help:
+	@grep -E "^[a-z-]+:" makefile | cut -d: -f1
+
 is-cuda-available-device:
 	uv run python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 
@@ -14,3 +17,6 @@ get-models-qwen:
 
 server-log:
 	grep -iE "non-default args|model loading took|KV cache|maximum concurrency|startup complete" server.log
+
+available-benchmarks:
+	@ls bench_sh/*.sh

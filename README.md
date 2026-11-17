@@ -11,7 +11,7 @@ uv sync
 
 ## Running a benchmark
 
-Ready-made sweeps in `bench_sh/`:
+Ready-made sweeps in `bench_sh/` (list them with `make available-benchmarks`):
 
 ```bash
 bash bench_sh/gpumem.sh            # gpu-memory-utilization 0.55 → 0.9
@@ -24,11 +24,6 @@ bash bench_sh/wrkld_profile_ll.sh  # long-long profile (lighter sweep)
 
 ## Composable configs
 
-The server config is merged in this order (later files override earlier ones):
-
-```
-configs/base.yaml → configs/models/*.yaml → configs/kv_cache/*.yaml → configs/engine/*.yaml
-```
 
 | Folder | Content | Example |
 |---|---|---|
@@ -58,6 +53,8 @@ Aggregated metrics: output throughput, total throughput, TTFT (median, p99), TPO
 
 | Target | Purpose |
 |---|---|
+| `make help` (or `make`) | List all available targets |
+| `make available-benchmarks` | List the ready-made sweeps in `bench_sh/` |
 | `make nvidia-followup` | GPU monitoring (utilization, memory, power) every second |
 | `make get-models` | Models in the HF cache |
 | `make server-log` | Key lines from a `server.log` (KV cache, max concurrency…) |
