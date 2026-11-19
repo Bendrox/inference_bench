@@ -3,7 +3,7 @@ sweep_concurrency.py : compromis débit / latence et goodput selon la concurrenc
 
 Entrée : `results/<expe>/conc_<N>/synthese.json` (+ `run.yaml` pour lire le SLO)
 
-Sortie : `results/<expe>/conc_sweep.png`, 3 graphiques :
+Sortie : `results/<expe>/conc_sweep.png` (ou --output), 3 graphiques :
   1. débit de sortie (x) vs TTFT p99 (y), un point par concurrence ;
   2. débit de sortie (x) vs TPOT p99 (y) ;
   3. débit total vs goodput (req/s) selon la concurrence.
@@ -11,18 +11,18 @@ Sortie : `results/<expe>/conc_sweep.png`, 3 graphiques :
 Les seuils SLO (lus dans run.yaml, option --goodput) sont tracés en pointillés.
 Le graphique 3 n'affiche le goodput que si les runs ont été lancés avec --goodput.
 
-Usage :  uv run python bench/plot/sweep_concurrency.py [nom_expe]   (défaut : "sweep_concurrency_goodput")
+Usage :  uv run python -m inference_bench.analysis.concurrency [nom_expe] [--output fichier.png]
+         (défaut : "sweep_concurrency_slo" ; nom_expe peut être imbriqué,
+          ex. sweep_powerlimit_concur/sweep_concurrency_slo_400w)
 """
-import sys
+import argparse
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from common import RESULTS, axe_concurrence, charger, lire_slo, sauver
+from .common import RESULTS, axe_concurrence, charger, lire_slo, sauver
 
-EXPE = sys.argv[1] if len(sys.argv) > 1 else "sweep_concurrency_goodput"
-DOSSIER = RESULTS / EXPE
 PREFIXE = "conc_"                      # dossiers : conc_1, conc_2, ...
-SORTIE = DOSSIER / "conc_sweep.png"
 
 
 def tracer_latence(ax, data: dict[int, dict], cle: str, seuil: float | None) -> None:
@@ -54,16 +54,23 @@ def tracer_goodput(ax, data: dict[int, dict]) -> None:
     ax.grid(alpha=0.3)
 
 
-def main() -> None:
-    data = charger(DOSSIER, PREFIXE)
-    slo = lire_slo(DOSSIER)
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description="Sweep de concurrence : débit / latence / goodput")
+    parser.add_argument("expe", nargs="?", default="sweep_concurrency_slo")
+    parser.add_argument("--output", type=Path, default=None, help="défaut : results/<os>/<expe>/conc_sweep.png")
+    args = parser.parse_args(argv)
+    dossier = RESULTS / args.expe
+
+    data = charger(dossier, PREFIXE)
+    slo = lire_slo(dossier)
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     tracer_latence(axes[0], data, "p99_ttft_ms", slo.get("ttft"))
     tracer_latence(axes[1], data, "p99_tpot_ms", slo.get("tpot"))
     tracer_goodput(axes[2], data)
 
-    sauver(fig, SORTIE, f"Sweep de concurrence : {EXPE} (point = médiane des runs)")
+    sauver(fig, args.output or dossier / "conc_sweep.png",
+           f"Sweep de concurrence : {args.expe} (point = médiane des runs)")
 
 
 if __name__ == "__main__":

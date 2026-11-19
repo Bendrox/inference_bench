@@ -1,9 +1,10 @@
-import os, signal, subprocess, time, urllib.request, urllib.error
-from pathlib import Path
-
-
-from pathlib import Path
+import os
+import signal
 import subprocess
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
 
 def start_server(serve_yaml: Path, log_path: Path) -> subprocess.Popen:
     """

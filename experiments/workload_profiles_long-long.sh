@@ -1,7 +1,9 @@
+#!/usr/bin/env bash
 # Adapted Workload profiling for Long Long benchmark  to make it suitable (not too long ) and improve benchmark efficiency 
+# Graphe : uv run python -m inference_bench.analysis.workload
 # : profil × concurrence, setup figé 
-# Phase 1 : bash bench_sh/wrkld_profile.sh
-# Phase 2 : PROFILS="real-court-court real-court-long real-long-court" bash bench_sh/wrkld_profile.sh
+# Phase 1 : bash experiments/workload_profiles.sh
+# Phase 2 : PROFILS="real-court-court real-court-long real-long-court" bash experiments/workload_profiles.sh
 PROFILS=${PROFILS:-"long-long"}
 ENGINE=configs/engine/ctx32k-seqs256-batch8k.yaml
 SLO="ttft:1000 tpot:50"
@@ -18,7 +20,7 @@ for p in $PROFILS; do
     # $N sans guillemets : bash découpe la valeur sur les espaces -> deux arguments ("--num-prompts" puis "30").
     #   Avec "$N", ce serait un seul argument "--num-prompts 30". Même chose pour $SLO.
     # A || B : exécute B seulement si A échoue (code de retour non nul).
-    uv run python bench/main.py --expe-name wrkld_$p --output_dir conc_$c \
+    uv run python bench/main.py --expe-name workload_$p --output_dir conc_$c \
       --dataset configs/dataset/$p.yaml --engine $ENGINE \
       --nb-runs 2 \
       --num-warmups 4  \

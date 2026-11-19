@@ -3,13 +3,13 @@ import sys
 import tempfile
 from pathlib import Path
 
-from client import run_bench
-from config import PROJECT_ROOT, assemble_yaml, load_client, os_tag, read_arg, write_run_yaml
-from server import start_server, stop_server, wait_ready
-from summarize import print_synthese, summarize
+from inference_bench.config import PROJECT_ROOT, assemble_yaml, load_client, read_arg, write_run_yaml
+from inference_bench.hardware import os_tag
+from inference_bench.loadgen import run_bench
+from inference_bench.metrics import print_synthese, summarize
 
-def main():
-    args= read_arg()
+def main(argv: list[str] | None = None):
+    args= read_arg(argv)
     
     dossier= PROJECT_ROOT / "results" / os_tag() / args.expe_name / args.output_dir
     if (dossier / "synthese.json").exists():

@@ -49,9 +49,6 @@ def print_synthese(synthese: dict) -> None:
 
 if __name__ == "__main__":          # l'usage en ligne de commande continue de marcher
     if len(sys.argv) != 2:
-        sys.exit("Usage : python bench/summarize.py <dossier_de_résultats>")
+        sys.exit("Usage : uv run python -m inference_bench.metrics <dossier_de_résultats>")
     print_synthese(summarize(Path(sys.argv[1])))
 
-
-
-# uv run python bench/summarize.py results/sharegpt/Qwen3.5-9B-FP8-self_fp8-nocache_ctx8k-seqs256-batch8k_conc256-n1000

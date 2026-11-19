@@ -20,5 +20,4 @@ wheels/
 !/results/**/bench_run*.txt
 !/results/**/*.png
 
-# Secrets
 .env

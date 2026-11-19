@@ -1,11 +1,13 @@
-import yaml
-from pathlib import Path
 import argparse
-import platform
-import subprocess
 from datetime import datetime
+from pathlib import Path
 
-PROJECT_ROOT=Path(__file__).resolve().parent.parent
+import yaml
+
+from .hardware import get_gpu_info, get_os_info
+
+# src/inference_bench/config.py -> racine du repo (le package est installé en mode éditable)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH= PROJECT_ROOT / "configs"
 BASE_FILE=CONFIG_PATH / "base.yaml"
 
@@ -66,35 +68,6 @@ def load_client(args) -> dict:
         
     }
     
-def get_gpu_info() -> dict:
-    """Infos du 1er GPU via nvidia-smi (n'initialise pas CUDA dans ce process).
-    Si nvidia-smi est absent ou échoue, retourne {"name": "unknown"} sans planter le bench."""
-    cmd = ["nvidia-smi",
-           "--query-gpu=name,memory.total,driver_version,enforced.power.limit,power.default_limit",
-           "--format=csv,noheader,nounits"]
-    try:
-        sortie = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
-        name, mem, driver, power, power_default = [x.strip() for x in sortie.splitlines()[0].split(",")]
-        return {"name": name, "memory_total_mib": int(mem), "driver": driver,
-                 "power_limit_w": float(power), "power_default_w": float(power_default)}
-    except (OSError, subprocess.CalledProcessError, ValueError, IndexError):
-        return {"name": "unknown"}
-
-def os_tag() -> str:
-    """Sous-dossier de results/ : 'wsl' ou 'linux', pour ne pas mélanger les deux environnements."""
-    return "wsl" if "microsoft" in platform.release().lower() else "linux"
-
-def get_os_info() -> dict:
-    """OS de la machine de bench. Sous WSL, le noyau Linux tourne sur Windows
-    (release du type '...-microsoft-standard-WSL2') : on le signale explicitement."""
-    try:
-        distro = platform.freedesktop_os_release().get("PRETTY_NAME", "unknown")
-    except OSError:
-        distro = "unknown"
-    wsl = "microsoft" in platform.release().lower()
-    return {"host": "Windows + WSL" if wsl else platform.system(),
-            "distro": distro, "kernel": platform.release(), "wsl": wsl}
-
 def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
     """Snapshot complet de l'expérience dans <dossier>/run.yaml (par sections).
     `config` = config vLLM fusionnée (celle passée à `vllm serve --config`), `client` = valeurs résolues de load_client."""
@@ -113,8 +86,8 @@ def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
         yaml.safe_dump(run, f, sort_keys=False, allow_unicode=True, default_flow_style=False)
 
 
-def read_arg():
-    parser = argparse.ArgumentParser(description="Assemble les configs pour un benchmark")
+def read_arg(argv: list[str] | None = None):
+    parser = argparse.ArgumentParser(description="Lance un benchmark vLLM à partir de configs composées")
     parser.add_argument("--output-file", default= "global_config.yaml")
     parser.add_argument("--model", default= "configs/models/Qwen3.5-9B-FP8-self.yaml")
     parser.add_argument("--dataset", default="configs/dataset/sharegpt.yaml")
@@ -132,7 +105,7 @@ def read_arg():
                     help="nb de requêtes = N x concurrence (borné entre 100 et la valeur du fichier client)")
     parser.add_argument("--goodput", nargs="+", default=None,
                     help="SLO en ms pour le goodput, ex. --goodput ttft:1000 tpot:50")
-    return parser.parse_args()
+    return parser.parse_args(argv)
     
 
 if __name__ == "__main__":
