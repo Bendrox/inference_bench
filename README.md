@@ -1,6 +1,6 @@
 # vllm-bench
 
-A benchmarking harness for **vLLM** inference performance on an RTX 5090 (32 GB).
+A benchmarking harness for **vLLM** inference performance on a single GPU: RTX 5090 (32 GB).
 Each run starts a vLLM server from a composed config, drives it with `vllm bench serve`, repeats the measurement N times and computes the run-to-run noise.
 
 ## Setup
