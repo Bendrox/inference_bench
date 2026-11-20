@@ -11,13 +11,30 @@ uv sync
 
 ## Running a benchmark
 
-One run (server start → N measurements → summary):
+### Option 1 : a single run
+
+One run = start the vLLM server → N measurements → summary.
+
+**Example 1 : I want to measure the default model with 16 users at the same time, and check that responses stay fast (first token under 1 s, then under 50 ms per token):**
 
 ```bash
 uv run python bench/main.py --expe-name my_test --output_dir conc_16 --max-conc 16 --goodput ttft:1000 tpot:50
 ```
 
-Ready-made sweeps in `experiments/` (list them with `make available-benchmarks`):
+**Example 2 : I want to test long prompts with short answers, with 32k context, 64 users at once and only 2 repetitions:**
+
+```bash
+uv run python bench/main.py --expe-name my_long_short --output_dir conc_64 \
+  --dataset configs/dataset/long-short.yaml \
+  --engine configs/engine/ctx32k-seqs256-batch8k.yaml \
+  --max-conc 64 --nb-runs 2
+```
+
+Results land in `results/<os>/<expe-name>/<output_dir>/`.
+
+### Option 2 : a ready-made sweep
+
+Scripts in `experiments/` chain several runs (list them with `make available-benchmarks`):
 
 ```bash
 bash experiments/sweep_gpumem.sh                # gpu-memory-utilization 0.55 → 0.9
@@ -30,7 +47,7 @@ bash experiments/workload_profiles_long-long.sh # long-long profile (lighter swe
 
 Each script name is also its experiment name, i.e. its folder in `results/<os>/`.
 
-## Project layout
+## Project structure
 
 ```
 bench/main.py            # entry point: one run = config → vLLM server → N bench runs → summary
@@ -60,7 +77,11 @@ hardware/                # machine setup (MSI Afterburner / undervolt profiles)
 
 ## Results
 
-Results are split by environment, detected automatically: `results/wsl/` (Windows + WSL) or `results/linux/` (native). An existing run is never overwritten. Plots read the current OS folder; use `BENCH_OS=wsl` to plot the other one.
+Results are split by environment, detected automatically: `results/wsl/` (Windows + WSL) or `results/linux/` (native). 
+
+An existing run is never overwritten (results take hours to produce and are versioned, so a re-run with the same `--expe-name` / `--output_dir` stops with an error instead of erasing them; the check is on the folder name, not on the parameters: two runs with exactly the same parameters but different folder names both run and are kept side by side, which costs a second run but gives a repeatability check; only a run interrupted before writing `synthese.json` can be re-run in the same folder). 
+
+Plots read the current OS folder; use `BENCH_OS=wsl` to plot the other one.
 
 ```
 results/<os>/<expe-name>/<output_dir>/
@@ -97,11 +118,8 @@ Each accepts `--output <file.png>`; by default the figure is written next to the
 | `make get-models` | Models in the HF cache |
 | `make server-log` | Key lines from a `server.log` (KV cache, max concurrency…) |
 
-## Progress
+## Planned to do:
 
-All runs so far were made on Windows + WSL Ubuntu; next ones run on native Ubuntu (see the `os` section of each `run.yaml`).
-
-Planned:
 - Quantization BF16 → FP8 / AWQ / GPTQ / NVFP4: speed vs quality.
 - Agentic workload profiling.
 - Pareto curve: throughput vs latency.
