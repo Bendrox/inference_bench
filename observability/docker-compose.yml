@@ -1,0 +1,44 @@
+services:
+  prometheus:
+    image:prom/prometheus:3.16.0
+    network_mode: host # Désactive l'isolation réseau habituelle de Docker
+    command: 
+      - '--config.file=/etc/prometheus/prometheus.yml' #fichier de configuration principal à l'intérieur du conteneur
+      - --storage.tsdb.retention.time=90d  # 15 jours par défaut
+      - --web.listen-address=127.0.0.1:9090 # Force l'interface web et l'API de Prometheus à n'écouter que sur l'adresse locale (127.0.0.1) sur le port 9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro # lier des dossiers ou fichiers entre votre machine hôte et l'intérieur du conteneur.
+      - prom_data:/prometheus # Monte fichier local prometheus.yml
+    restart: unless-stopped # relancera le conteneur s'il plante ou si le serveur redémarre
+
+  grafana:
+    image: grafana/grafana:latest
+    network_mode: host
+    environment: 
+      GF_SERVER_HTTP_ADDR: 127.0.0.1 # Restreint l'accès à l'interface web de Grafana uniquement à la machine locale
+      GF_AUTH_ANONYMOUS_ENABLED: "true"    # N'importe qui accédant à l'URL peut voir Grafana sans avoir besoin d'un compte
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin # Attribue le rôle admin à l'utilisateur anonyme, donne ctr tt
+      GF_AUTH_DISABLE_LOGIN_FORM: "true" #Masque complètement la page de connexion
+    volumes: # Lie les dossiers de votre machine hôte a ceux conteneurs
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro # pour automatiser la config grafana au demarrage du conteneur
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro # pour automatiser la config des dashboards au demarrage du conteneur
+      - grafana_data:/var/lib/grafana # sauvegarder la base de données interne de Grafana
+    restart: unless-stopped
+
+  gpu-exporter:
+    image: utkuozdemir/nvidia_gpu_exporter:latest   # lit nvidia-smi, port 9835
+    network_mode: host
+    command: ["--web.listen-address=127.0.0.1:9835"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, utility]
+    restart: unless-stopped
+
+volumes:
+  prom_data:
+  grafana_data:
+
