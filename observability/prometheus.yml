@@ -1,0 +1,11 @@
+global:                                  # Réglages par défaut pour tous les jobs
+  scrape_interval: 1s                    # Collecte toutes les 1 s (précis pour increase() sur runs courts)
+  scrape_timeout: 1s                     # Abandonne si pas de réponse en 1 s (doit être <= interval)
+
+scrape_configs:                          # Liste des jobs de collecte, recupere tout ce que les serveurs exposent sur /metrics
+  - job_name: vllm                       #  label/etiquette job="vllm"
+    static_configs:                      # Cibles écrites en dur (pas de découverte auto)
+      - targets: ["127.0.0.1:8000"]      # Serveur vLLM : GET http://127.0.0.1:8000/metrics
+  - job_name: gpu                        # label/etiquette job="gpu"
+    static_configs:                      # Cibles écrites en dur
+      - targets: ["127.0.0.1:9835"]      # Exporteur GPU NVIDIA (port 9835 par défaut)

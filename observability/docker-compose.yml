@@ -1,44 +1,37 @@
+x-commun: &commun                                # Bloc réutilisable (le préfixe x- est ignoré par Compose)
+  network_mode: host                             # Réseau de la machine : 127.0.0.1 = l'hôte
+  restart: unless-stopped                        # Redémarre après plantage ou reboot, sauf arrêt manuel
+
 services:
-  prometheus:
-    image:prom/prometheus:3.16.0
-    network_mode: host # Désactive l'isolation réseau habituelle de Docker
-    command: 
-      - '--config.file=/etc/prometheus/prometheus.yml' #fichier de configuration principal à l'intérieur du conteneur
-      - --storage.tsdb.retention.time=90d  # 15 jours par défaut
-      - --web.listen-address=127.0.0.1:9090 # Force l'interface web et l'API de Prometheus à n'écouter que sur l'adresse locale (127.0.0.1) sur le port 9090
+  prometheus:                                    # Collecte des métriques
+    <<: *commun                                  
+    image: prom/prometheus:3.16.0                # Version figée
+    command:                                     # Arguments de Prometheus
+      - --config.file=/etc/prometheus/prometheus.yml   # Fichier de config dans le conteneur (les 2 jobs)
+      - --storage.tsdb.retention.time=90d        # Garde les données 90 jrs
+      - --web.listen-address=127.0.0.1:9090      # Interface web en local uniquement
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro # lier des dossiers ou fichiers entre votre machine hôte et l'intérieur du conteneur.
-      - prom_data:/prometheus # Monte fichier local prometheus.yml
-    restart: unless-stopped # relancera le conteneur s'il plante ou si le serveur redémarre
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro   # Votre config, en lecture seule
+      - prom_data:/prometheus                    # Données persistantes
 
-  grafana:
-    image: grafana/grafana:latest
-    network_mode: host
-    environment: 
-      GF_SERVER_HTTP_ADDR: 127.0.0.1 # Restreint l'accès à l'interface web de Grafana uniquement à la machine locale
-      GF_AUTH_ANONYMOUS_ENABLED: "true"    # N'importe qui accédant à l'URL peut voir Grafana sans avoir besoin d'un compte
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin # Attribue le rôle admin à l'utilisateur anonyme, donne ctr tt
-      GF_AUTH_DISABLE_LOGIN_FORM: "true" #Masque complètement la page de connexion
-    volumes: # Lie les dossiers de votre machine hôte a ceux conteneurs
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro # pour automatiser la config grafana au demarrage du conteneur
-      - ./grafana/dashboards:/etc/grafana/dashboards:ro # pour automatiser la config des dashboards au demarrage du conteneur
-      - grafana_data:/var/lib/grafana # sauvegarder la base de données interne de Grafana
-    restart: unless-stopped
+  grafana:                                       # Affichage des dashboards
+    <<: *commun
+    image: grafana/grafana:13.3.2                # Version figée
+    environment:
+      GF_SERVER_HTTP_ADDR: 127.0.0.1             # Accessible en local uniquement
+      GF_AUTH_ANONYMOUS_ENABLED: "true"          # Accès sans compte
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin          # L'utilisateur anonyme a tous les droits
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro  # Src de données et config auto
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro      # Dashboards chargés au démarrage
+      - grafana_data:/var/lib/grafana            # Base interne persistante
 
-  gpu-exporter:
-    image: utkuozdemir/nvidia_gpu_exporter:latest   # lit nvidia-smi, port 9835
-    network_mode: host
-    command: ["--web.listen-address=127.0.0.1:9835"]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu, utility]
-    restart: unless-stopped
+  gpu-exporter:                                  # Métriques GPU via nvidia-smi
+    <<: *commun
+    image: utkuozdemir/nvidia_gpu_exporter:1.4.1 # Version figée (voir plus bas)
+    command: ["--web.listen-address=127.0.0.1:9835"]  # Port attendu par prometheus.yml
+    gpus: all                                    # Donne accès aux GPU NVIDIA
 
-volumes:
+volumes:                                         # Volumes nommés, conservés entre redémarrages
   prom_data:
   grafana_data:
-
