@@ -1,0 +1,2 @@
+kv-cache-dtype: fp8
+enable-prefix-caching: true

@@ -1,0 +1,8 @@
+# Bench agentic: prompts = préfixe shared (prompt système + tools + histrory)
+# + suffixe unique (nouveau message). Valeurs par défaut, surchargées par --dataset-set.
+dataset-name: prefix_repetition
+prefix-repetition-prefix-len: 8192    # multiple de 16 (taille des blocs du KV cache)
+prefix-repetition-suffix-len: 256
+prefix-repetition-num-prefixes: 16    # nombre d'agents distincts ; le sweep le met égal à la concurrence
+prefix-repetition-output-len: 256
+ignore-eos: true

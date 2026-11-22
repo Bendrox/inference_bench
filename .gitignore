@@ -19,5 +19,6 @@ wheels/
 !/results/**/run.yaml
 !/results/**/bench_run*.txt
 !/results/**/*.png
+!/results/**/server_metrics*.json
 
 .env

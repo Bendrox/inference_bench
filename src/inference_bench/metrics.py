@@ -17,6 +17,16 @@ from pathlib import Path
 CLES = ["output_throughput", "total_token_throughput", "median_ttft_ms", "p99_ttft_ms", "median_tpot_ms", "p99_tpot_ms"]
 # Agrégées seulement si présentes : request_goodput vaut None quand le run est lancé sans --goodput
 CLES_OPTIONNELLES = ["request_throughput", "request_goodput"]
+# Métriques serveur (server_metrics<i>.json, écrits par observability.collect), préfixées srv_
+CLES_SERVEUR = ["prefix_cache_hit_rate", "kv_cache_usage_max", "requests_waiting_max",
+                "preemptions", "gpu_power_avg_w", "energy_j", "joules_per_output_token"]
+
+
+def _stats(vals: list[float]) -> dict:
+    """Médiane, min, max et écart relatif (max - min) / médiane en %."""
+    med = statistics.median(vals)
+    ecart = 100 * (max(vals) - min(vals)) / med if med else None   # goodput peut valoir 0
+    return {"mediane": med, "min": min(vals), "max": max(vals), "ecart_pct": ecart}
 
 
 def summarize(dossier: Path) -> dict:
@@ -32,9 +42,20 @@ def summarize(dossier: Path) -> dict:
         vals = [r.get(cle) for r in runs]
         if None in vals:              # métrique optionnelle absente : on l'ignore
             continue
-        med = statistics.median(vals)
-        ecart = 100 * (max(vals) - min(vals)) / med if med else None   # goodput peut valoir 0
-        synthese[cle] = {"mediane": med, "min": min(vals), "max": max(vals), "ecart_pct": ecart}
+        synthese[cle] = _stats(vals)
+
+    # Métriques serveur : seulement si chaque run a son server_metrics<i>.json
+    serveurs = sorted(dossier.glob("server_metrics*.json"))
+    if len(serveurs) == len(runs):
+        srv = [json.loads(f.read_text(encoding="utf-8")) for f in serveurs]
+        for s, r in zip(srv, runs):   # même tri : run1.json <-> server_metrics1.json
+            # joules/token : seul endroit qui voit l'énergie (serveur) et les tokens (client)
+            if s.get("energy_j") is not None and r.get("total_output_tokens"):
+                s["joules_per_output_token"] = s["energy_j"] / r["total_output_tokens"]
+        for cle in CLES_SERVEUR:
+            vals = [s.get(cle) for s in srv]
+            if None not in vals:      # ex. taux de hit None sans prefix caching
+                synthese[f"srv_{cle}"] = _stats(vals)
 
     with open(dossier / "synthese.json", "w", encoding="utf-8") as f:
         json.dump(synthese, f, ensure_ascii=False, indent=4)

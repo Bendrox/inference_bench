@@ -1,4 +1,5 @@
 import argparse
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -12,9 +13,16 @@ CONFIG_PATH= PROJECT_ROOT / "configs"
 BASE_FILE=CONFIG_PATH / "base.yaml"
 
 def load_dataset(args):
-    """Lit le YAML du profil : chaque clé est un argument de `vllm bench serve`."""
+    """Lit le YAML du profil (chaque clé est un argument de `vllm bench serve`),
+    puis applique les surcharges --dataset-set CLE=VAL."""
     with open(PROJECT_ROOT / args.dataset, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        profil = yaml.safe_load(f)
+    for paire in args.dataset_set or []:
+        if "=" not in paire:
+            sys.exit(f"ERREUR : --dataset-set attend CLE=VAL, reçu : {paire}")
+        cle, val = paire.split("=", 1)
+        profil[cle] = yaml.safe_load(val)   # "8192" -> 8192, "true" -> True
+    return profil
 
 def get_server_files_path(args) -> list[Path]:
     "Donne ordre de prio croissante : un fichier bas écrase le précédent"
@@ -65,7 +73,7 @@ def load_client(args) -> dict:
         "num_warmups": args.num_warmups or max_conc,
         "goodput": args.goodput,   # ex. ["ttft:1000", "tpot:50"], ou None
         "profil": load_dataset(args),
-        
+        "vary_seed": args.vary_seed,   # seed client = n° du run (évite un cache chaud entre runs)
     }
     
 def write_run_yaml(dossier: Path, args, config: dict, client: dict) -> None:
@@ -105,6 +113,10 @@ def read_arg(argv: list[str] | None = None):
                     help="nb de requêtes = N x concurrence (borné entre 100 et la valeur du fichier client)")
     parser.add_argument("--goodput", nargs="+", default=None,
                     help="SLO en ms pour le goodput, ex. --goodput ttft:1000 tpot:50")
+    parser.add_argument("--dataset-set", nargs="+", default=None, metavar="CLE=VAL",
+                    help="surcharge le profil dataset, ex. --dataset-set prefix-repetition-prefix-len=8192")
+    parser.add_argument("--vary-seed", action="store_true",
+                    help="seed client différente à chaque run (évite un cache chaud entre runs)")
     return parser.parse_args(argv)
     
 

@@ -1,4 +1,4 @@
-.PHONY: help is-cuda-available-device nvidia-followup get-models get-models-qwen server-log available-benchmarks plots
+.PHONY: help is-cuda-available-device nvidia-followup get-models get-models-qwen server-log available-benchmarks plots obs-up obs-down obs-check
 
 help:
 	@grep -E "^[a-z-]+:" Makefile | cut -d: -f1
@@ -27,3 +27,13 @@ plots:
 	-uv run python -m inference_bench.analysis.concurrency sweep_concurrency_noslo
 	-uv run python -m inference_bench.analysis.gpu_memory sweep_gpumem
 	-uv run python -m inference_bench.analysis.workload
+	-uv run python -m inference_bench.analysis.prefix_rep sweep_prefix_rep
+
+obs-up:
+	docker compose -f observability/docker-compose.yml up -d
+
+obs-down:
+	docker compose -f observability/docker-compose.yml down
+
+obs-check:
+	@curl -s localhost:9090/api/v1/targets | python3 -c "import json,sys; [print(t['labels']['job'], t['health']) for t in json.load(sys.stdin)['data']['activeTargets']]"
