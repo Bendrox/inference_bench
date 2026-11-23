@@ -16,6 +16,9 @@ dependencies = [
     "vllm>=0.31.0",
 ]
 
+[project.scripts]
+inference-bench = "inference_bench.cli:main"
+
 [build-system]
 requires = ["uv_build>=0.9.28,<0.10.0"]
 build-backend = "uv_build"

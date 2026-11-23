@@ -18,13 +18,13 @@ One run = start the vLLM server → N measurements → summary.
 **Example 1 : I want to measure the default model with 16 users at the same time, and check that responses stay fast (first token under 1 s, then under 50 ms per token):**
 
 ```bash
-uv run python bench/main.py --expe-name my_test --output_dir conc_16 --max-conc 16 --goodput ttft:1000 tpot:50
+uv run inference-bench --expe-name my_test --output_dir conc_16 --max-conc 16 --goodput ttft:1000 tpot:50
 ```
 
 **Example 2 : I want to test long prompts with short answers, with 32k context, 64 users at once and only 2 repetitions:**
 
 ```bash
-uv run python bench/main.py --expe-name my_long_short --output_dir conc_64 \
+uv run inference-bench --expe-name my_long_short --output_dir conc_64 \
   --dataset configs/dataset/long-short.yaml \
   --engine configs/engine/ctx32k-seqs256-batch8k.yaml \
   --max-conc 64 --nb-runs 2
@@ -50,8 +50,8 @@ Each script name is also its experiment name, i.e. its folder in `results/<os>/`
 ## Project structure
 
 ```
-bench/main.py            # entry point: one run = config → vLLM server → N bench runs → summary
 src/inference_bench/     # Python package (installed by `uv sync`)
+├── cli.py               # entry point (`uv run inference-bench`): one run = config → vLLM server → N bench runs → summary
 ├── config.py            # composes the YAML configs, writes run.yaml
 ├── hardware.py          # GPU / OS description recorded in run.yaml
 ├── server.py            # vLLM server lifecycle (start, health check, stop)

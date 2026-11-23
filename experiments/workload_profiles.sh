@@ -20,7 +20,7 @@ for p in $PROFILS; do
     # $N sans guillemets : bash découpe la valeur sur les espaces -> deux arguments ("--num-prompts" puis "30").
     #   Avec "$N", ce serait un seul argument "--num-prompts 30". Même chose pour $SLO.
     # A || B : exécute B seulement si A échoue (code de retour non nul).
-    uv run python bench/main.py --expe-name workload_$p --output_dir conc_$c \
+    uv run inference-bench --expe-name workload_$p --output_dir conc_$c \
       --dataset configs/dataset/$p.yaml --engine $ENGINE \
       --max-conc $c $N --gpu-mem 0.9 \
       --goodput $SLO || echo "ÉCHEC $p conc=$c"

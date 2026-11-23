@@ -10,6 +10,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
 PROM_URL = "http://127.0.0.1:9090"
 GRAFANA_URL = "http://127.0.0.1:3000"
@@ -68,10 +69,21 @@ def collect(t_start: float, t_end: float) -> dict | None:
 def annotate(t_start: float, t_end: float, texte: str, tags: list[str]) -> None:
     """Annotation Grafana sur la durée du run (zone visible sur tous les panneaux)."""
     corps = json.dumps({"time": int(t_start * 1000), "timeEnd": int(t_end * 1000),
-                        "tags": tags, "text": texte}).encode()
+                        "tags": ["bench", *tags],   # "bench" : tag filtré par le dashboard vllm.json
+                        "text": texte}).encode()
     req = urllib.request.Request(f"{GRAFANA_URL}/api/annotations", data=corps,
                                  headers={"Content-Type": "application/json"}, method="POST")
     try:
         urllib.request.urlopen(req, timeout=2)
     except (urllib.error.URLError, OSError):
         pass  # Grafana absent : pas grave
+
+
+def enregistrer(dossier: Path, i: int, t_start: float, t_end: float, tags: list[str]) -> None:
+    """Métriques serveur du run i -> <dossier>/server_metrics<i>.json, plus une annotation Grafana.
+    Ne fait rien si Prometheus est absent."""
+    srv = collect(t_start, t_end)
+    if srv is None:
+        return
+    (dossier / f"server_metrics{i}.json").write_text(json.dumps(srv, indent=4), encoding="utf-8")
+    annotate(t_start, t_end, f"{'/'.join(tags)} run {i}", tags)

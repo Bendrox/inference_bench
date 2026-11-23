@@ -1,10 +1,18 @@
 import os
 import signal
+import socket
 import subprocess
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+
+def port_libre(port: int) -> bool:
+    """False si un processus écoute déjà sur le port (ex. serveur vLLM orphelin d'un run interrompu) :
+    wait_ready le prendrait pour le nôtre et on mesurerait la mauvaise config."""
+    with socket.socket() as s:
+        return s.connect_ex(("127.0.0.1", port)) != 0
+
 
 def start_server(serve_yaml: Path, log_path: Path) -> subprocess.Popen:
     """

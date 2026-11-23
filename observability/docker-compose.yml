@@ -5,7 +5,7 @@ x-commun: &commun                                # Bloc réutilisable (le préfi
 services:
   prometheus:                                    # Collecte des métriques
     <<: *commun                                  
-    image: prom/prometheus:3.16.0                # Version figée
+    image: prom/prometheus:v3.16.0                # Version figée
     command:                                     # Arguments de Prometheus
       - --config.file=/etc/prometheus/prometheus.yml   # Fichier de config dans le conteneur (les 2 jobs)
       - --storage.tsdb.retention.time=90d        # Garde les données 90 jrs

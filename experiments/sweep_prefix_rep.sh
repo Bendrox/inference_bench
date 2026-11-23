@@ -12,7 +12,7 @@ CONCS=${CONCS:-"1 2 4 8 16 32 64"}
 for cache in fp8-cache fp8-nocache; do
   for p in $PREFIX_LENS; do
     for c in $CONCS; do
-      uv run python bench/main.py --expe-name "$EXPE" --output_dir "${cache}_p${p}_conc_${c}" \
+      uv run inference-bench --expe-name "$EXPE" --output_dir "${cache}_p${p}_conc_${c}" \
         --dataset configs/dataset/prefix-rep.yaml \
         --dataset-set prefix-repetition-prefix-len=$p prefix-repetition-num-prefixes=$c \
         --kv_cache configs/kv_cache/$cache.yaml \

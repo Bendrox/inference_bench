@@ -1,7 +1,7 @@
 """
 sweep_gpumem.py : trace l'effet de `gpu-memory-utilization` sur les métriques du benchmark.
 
-Chaque lancement produit (voir bench/main.py et metrics.py) :
+Chaque lancement produit (voir cli.py et metrics.py) :
     results/<expe>/gpu_<valeur>/synthese.json
 
 Ce script lit tous ces `synthese.json` d'une expérience, puis trace une courbe
