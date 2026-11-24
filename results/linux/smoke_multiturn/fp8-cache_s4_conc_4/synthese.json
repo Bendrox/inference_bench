@@ -1,0 +1,74 @@
+{
+    "output_throughput": {
+        "mediane": 479.3091485524279,
+        "min": 479.3091485524279,
+        "max": 479.3091485524279,
+        "ecart_pct": 0.0
+    },
+    "total_token_throughput": {
+        "mediane": 7038.058830558983,
+        "min": 7038.058830558983,
+        "max": 7038.058830558983,
+        "ecart_pct": 0.0
+    },
+    "median_ttft_ms": {
+        "mediane": 178.6645634999786,
+        "min": 178.6645634999786,
+        "max": 178.6645634999786,
+        "ecart_pct": 0.0
+    },
+    "p99_ttft_ms": {
+        "mediane": 389.9352550001822,
+        "min": 389.9352550001822,
+        "max": 389.9352550001822,
+        "ecart_pct": 0.0
+    },
+    "median_tpot_ms": {
+        "mediane": 7.562066694117675,
+        "min": 7.562066694117675,
+        "max": 7.562066694117675,
+        "ecart_pct": 0.0
+    },
+    "p99_tpot_ms": {
+        "mediane": 7.965795937256118,
+        "min": 7.965795937256118,
+        "max": 7.965795937256118,
+        "ecart_pct": 0.0
+    },
+    "request_throughput": {
+        "mediane": 1.8723013615329216,
+        "min": 1.8723013615329216,
+        "max": 1.8723013615329216,
+        "ecart_pct": 0.0
+    },
+    "cached_tokens_ratio": {
+        "mediane": 0.6782676959309172,
+        "min": 0.6782676959309172,
+        "max": 0.6782676959309172,
+        "ecart_pct": 0.0
+    },
+    "srv_prefix_cache_hit_rate": {
+        "mediane": 0.6759722647421376,
+        "min": 0.6759722647421376,
+        "max": 0.6759722647421376,
+        "ecart_pct": 0.0
+    },
+    "srv_kv_cache_usage_max": {
+        "mediane": 0.031632653061224536,
+        "min": 0.031632653061224536,
+        "max": 0.031632653061224536,
+        "ecart_pct": 0.0
+    },
+    "srv_requests_waiting_max": {
+        "mediane": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "ecart_pct": null
+    },
+    "srv_preemptions": {
+        "mediane": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "ecart_pct": null
+    }
+}

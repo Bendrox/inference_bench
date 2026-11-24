@@ -1,0 +1,68 @@
+{
+    "output_throughput": {
+        "mediane": 406.09291151940243,
+        "min": 406.09291151940243,
+        "max": 406.09291151940243,
+        "ecart_pct": 0.0
+    },
+    "total_token_throughput": {
+        "mediane": 6097.077916018685,
+        "min": 6097.077916018685,
+        "max": 6097.077916018685,
+        "ecart_pct": 0.0
+    },
+    "median_ttft_ms": {
+        "mediane": 469.4488829998136,
+        "min": 469.4488829998136,
+        "max": 469.4488829998136,
+        "ecart_pct": 0.0
+    },
+    "p99_ttft_ms": {
+        "mediane": 812.1137719999751,
+        "min": 812.1137719999751,
+        "max": 812.1137719999751,
+        "ecart_pct": 0.0
+    },
+    "median_tpot_ms": {
+        "mediane": 7.634852843138301,
+        "min": 7.634852843138301,
+        "max": 7.634852843138301,
+        "ecart_pct": 0.0
+    },
+    "p99_tpot_ms": {
+        "mediane": 9.979341050979308,
+        "min": 9.979341050979308,
+        "max": 9.979341050979308,
+        "ecart_pct": 0.0
+    },
+    "request_throughput": {
+        "mediane": 1.5863004356226658,
+        "min": 1.5863004356226658,
+        "max": 1.5863004356226658,
+        "ecart_pct": 0.0
+    },
+    "cached_tokens_ratio": {
+        "mediane": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "ecart_pct": null
+    },
+    "srv_kv_cache_usage_max": {
+        "mediane": 0.03271983640081799,
+        "min": 0.03271983640081799,
+        "max": 0.03271983640081799,
+        "ecart_pct": 0.0
+    },
+    "srv_requests_waiting_max": {
+        "mediane": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "ecart_pct": null
+    },
+    "srv_preemptions": {
+        "mediane": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "ecart_pct": null
+    }
+}

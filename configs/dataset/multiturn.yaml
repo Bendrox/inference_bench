@@ -1,0 +1,13 @@
+# Sessions multi-tours (agent / chat) : chaque tour renvoie tout l'historique + un nouveau message,
+# le contexte grandit de (user-len + output-len) tokens par tour.
+# Pas lu par `vllm bench serve` : dataset-name=multiturn est servi par inference_bench/multiturn.py.
+# Qwen3.5 (hybride GDN) : cache réutilisé par tranches de 1056 tokens, pas 16 -> hit en escalier.
+# Surchargeable : --dataset-set multiturn-sessions=32 multiturn-turns=40 ...
+dataset-name: multiturn
+multiturn-sessions: 16          # conversations ; > --max-conc => des sessions attendent et leurs blocs KV deviennent évictables
+multiturn-turns: 30             # tours max (une session s'arrête avant de dépasser max-model-len)
+multiturn-system-len: 2048      # prompt système + définitions d'outils
+multiturn-shared-system: false  # true = même system pour toutes les sessions (le tour 0 hit aussi)
+multiturn-user-len: 256         # message utilisateur / résultat d'outil à chaque tour
+multiturn-output-len: 256       # réponse du modèle (ignore_eos : longueur fixe)
+multiturn-think-time: 0.0       # pause moyenne (s) entre deux tours d'une session (exécution d'outil)

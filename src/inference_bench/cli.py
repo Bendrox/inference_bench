@@ -13,6 +13,7 @@ from inference_bench.config import (PROJECT_ROOT, assemble_yaml, ecrire_yaml, lo
 from inference_bench.hardware import os_tag
 from inference_bench.loadgen import run_bench
 from inference_bench.metrics import print_synthese, summarize
+from inference_bench.multiturn import run_multiturn
 from inference_bench.server import port_libre, start_server, stop_server, wait_ready
 
 
@@ -28,6 +29,13 @@ def main(argv: list[str] | None = None):
     # 2. Configs serveur et client
     config = assemble_yaml(args)
     client = load_client(args)
+    # dataset-name=multiturn : générateur maison (inference_bench/multiturn.py) à la place de
+    # `vllm bench serve`, qui ne sait pas renvoyer l'historique réel d'une session.
+    multiturn = client["profil"].get("dataset-name") == "multiturn"
+    if multiturn:
+        # PIÈGE : sans cette option le serveur ne renvoie pas usage.prompt_tokens_details.cached_tokens
+        # et le taux de hit par tour (cached_tokens_ratio) reste vide.
+        config["enable-prompt-tokens-details"] = True
     port = config.get("port", 8000)
     if not port_libre(port):
         sys.exit(f"ERREUR : le port {port} est déjà utilisé (serveur vLLM orphelin ?). "
@@ -46,7 +54,10 @@ def main(argv: list[str] | None = None):
             wait_ready(proc, port)
             for i in range(1, args.nb_runs + 1):
                 print(f"-- Run {i}/{args.nb_runs} --")
-                t_start, t_end = run_bench(i, dossier, config["model"], client)
+                if multiturn:
+                    t_start, t_end = run_multiturn(i, dossier, config, client)
+                else:
+                    t_start, t_end = run_bench(i, dossier, config["model"], client)
                 if t_start is None or t_end is None:
                     print(f"Run {i} : fenêtre de mesure introuvable, métriques serveur ignorées")
                     continue

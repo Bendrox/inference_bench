@@ -28,6 +28,7 @@ plots:
 	-uv run python -m inference_bench.analysis.gpu_memory sweep_gpumem
 	-uv run python -m inference_bench.analysis.workload
 	-uv run python -m inference_bench.analysis.prefix_rep sweep_prefix_rep
+	-uv run python -m inference_bench.analysis.multiturn sweep_multiturn
 
 obs-up:
 	docker compose -f observability/docker-compose.yml up -d

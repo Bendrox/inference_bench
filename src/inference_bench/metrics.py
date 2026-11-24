@@ -16,7 +16,8 @@ from pathlib import Path
 
 CLES = ["output_throughput", "total_token_throughput", "median_ttft_ms", "p99_ttft_ms", "median_tpot_ms", "p99_tpot_ms"]
 # Agrégées seulement si présentes : request_goodput vaut None quand le run est lancé sans --goodput
-CLES_OPTIONNELLES = ["request_throughput", "request_goodput"]
+# cached_tokens_ratio : seulement dans les runs multiturn (taux de hit vu par le client)
+CLES_OPTIONNELLES = ["request_throughput", "request_goodput", "cached_tokens_ratio"]
 # Métriques serveur (server_metrics<i>.json, écrits par observability.collect), préfixées srv_
 CLES_SERVEUR = ["prefix_cache_hit_rate", "kv_cache_usage_max", "requests_waiting_max",
                 "preemptions", "gpu_power_avg_w", "energy_j", "joules_per_output_token"]
