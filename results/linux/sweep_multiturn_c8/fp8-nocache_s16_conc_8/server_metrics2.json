@@ -1,0 +1,12 @@
+{
+    "t_start": 1795789849.5103862,
+    "t_end": 1795790215.0446608,
+    "duration_s": 365.5342745780945,
+    "prefix_cache_hit_rate": null,
+    "kv_cache_usage_max": 0.163098878695209,
+    "requests_running_max": 8.0,
+    "requests_waiting_max": 2.0,
+    "preemptions": 0.0,
+    "gpu_power_avg_w": null,
+    "gpu_mem_used_max_gb": null
+}

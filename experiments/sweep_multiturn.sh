@@ -7,9 +7,12 @@
 # - ctx32k : à 30 tours x (256 + 256) tokens + 2048 de system, une session atteint ~17k tokens ;
 #   avec ctx8k elle s'arrêterait au tour ~11 et on ne verrait pas la croissance.
 # - --vary-seed : conversations différentes à chaque run, sinon le run 2 tape dans le cache du run 1.
-# - CONC vide => max-concurrency = sessions (toutes actives). CONC=8 avec SESSIONS="16 32 64" =>
-#   des sessions attendent entre deux tours, leurs blocs sont évictables : c'est là que le cache
-#   craque (cas agentique réel). Idem THINK>0 (pause outil entre deux tours).
+# - CONC vide => max-concurrency = sessions (toutes actives) : à 64 sessions, éviction + préemptions
+#   + batch saturé, effets mélangés. CONC=8 => charge GPU constante d'un point à l'autre, des
+#   sessions attendent et leurs blocs sont évictables (cas agentique réel). Évictable != évincé : le
+#   cache ne craque que si sessions x contexte > KV cache (~48 sessions de 30 tours ici), mais la
+#   hausse de TTFT vient alors uniquement de l'éviction. Cerner la falaise : SESSIONS="16 32 48 64 96".
+#   THINK>0 (pause outil entre deux tours) a le même effet que CONC < sessions.
 # - Sans cache, le TTFT croît avec le contexte : un gros SESSIONS x TURNS en nocache est long.
 # - Modèle par défaut Qwen3.5-9B = hybride : blocs de cache de 1056 tokens (voir server.log), le hit
 #   par tour monte en escalier. Pour un modèle à attention pure : --model configs/models/Qwen3-8B-FP8-ckpt.yaml

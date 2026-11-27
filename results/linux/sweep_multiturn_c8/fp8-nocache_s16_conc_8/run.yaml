@@ -1,0 +1,51 @@
+experiment:
+  name: sweep_multiturn_c8
+  output_dir: fp8-nocache_s16_conc_8
+  date: '2026-11-27T15:23:59'
+  nb_runs: 2
+sources:
+  model: configs/models/Qwen3.5-9B-FP8-self.yaml
+  kv_cache: configs/kv_cache/fp8-nocache.yaml
+  engine: configs/engine/ctx32k-seqs256-batch8k.yaml
+  client: configs/client/conc256-n3000.yaml
+  dataset: configs/dataset/multiturn.yaml
+os:
+  host: Linux
+  distro: Ubuntu 24.04.3 LTS
+  kernel: 7.0.0-44-generic
+  wsl: false
+gpu:
+  name: NVIDIA GeForce RTX 5090
+  memory_total_mib: 32607
+  driver: 595.99.02
+  power_limit_w: 450.0
+  power_default_w: 575.0
+serve:
+  host: 127.0.0.1
+  port: 8000
+  gpu-memory-utilization: 0.9
+  seed: 0
+  model: Qwen/Qwen3.5-9B
+  quantization: fp8_per_tensor
+  limit-mm-per-prompt: '{"image": 0, "video": 0}'
+  kv-cache-dtype: fp8
+  no-enable-prefix-caching: true
+  max-model-len: 32800
+  max-num-seqs: 256
+  max-num-batched-tokens: 8192
+  enable-prompt-tokens-details: true
+client:
+  max_conc: 8
+  num_prompts: 3000
+  num_warmups: 8
+  goodput: null
+  profil:
+    dataset-name: multiturn
+    multiturn-sessions: 16
+    multiturn-turns: 30
+    multiturn-system-len: 2048
+    multiturn-shared-system: false
+    multiturn-user-len: 256
+    multiturn-output-len: 256
+    multiturn-think-time: 0
+  vary_seed: true

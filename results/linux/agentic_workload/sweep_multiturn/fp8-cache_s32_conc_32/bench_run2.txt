@@ -1,0 +1,14 @@
+== Multi-turn benchmark ==
+completed               960
+failed                  0
+duration                148.7501139640808
+total_input_tokens      9290830
+total_output_tokens     245760
+request_throughput      6.45377656807587
+output_throughput       1652.1668014274228
+total_token_throughput  64111.48029306944
+median_ttft_ms          941.2761969997518
+p99_ttft_ms             2975.6860019997475
+median_tpot_ms          15.241780301959592
+p99_tpot_ms             21.356711968627337
+cached_tokens_ratio     0.8951897731419044
